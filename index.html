@@ -1,0 +1,2934 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Performance Lab | Sport, Výživa & Aktivní učení</title>
+
+  <!-- Bezpatková typografie Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+          },
+          colors: {
+            accent: {
+              DEFAULT: 'var(--color-accent)',
+              hover: 'var(--color-accent-hover)',
+              tint: 'var(--color-accent-tint)',
+              border: 'var(--color-accent-border)',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* ==========================================================================
+       1. DESIGN TOKENS & CSS3 PROMĚNNÉ
+       ========================================================================== */
+    :root {
+      --bg-canvas: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --border-card: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+
+      /* Akcentní královská modrá */
+      --color-accent: #2563eb;
+      --color-accent-hover: #1d4ed8;
+      --color-accent-tint: #eff6ff;
+      --color-accent-border: #bfdbfe;
+
+      /* Stíny a zaoblení */
+      --shadow-card: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.03);
+      --shadow-elevated: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 4px 10px -4px rgba(15, 23, 42, 0.04);
+      --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      margin: 0;
+    }
+
+    /* ==========================================================================
+       2. KOMPONENTY, KARTY A PŘECHODY
+       ========================================================================== */
+    .app-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-card);
+      box-shadow: var(--shadow-card);
+      border-radius: 1rem;
+    }
+
+    .info-box {
+      background-color: #fafbfc;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.75rem;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .info-box:hover {
+      border-color: var(--color-accent-border);
+      background-color: #f8faff;
+    }
+
+    /* Plynulé přepínání pohledů */
+    .view-panel {
+      display: none;
+      opacity: 0;
+      transform: translateY(6px);
+    }
+
+    .view-panel.is-active {
+      display: block;
+      animation: panelEnter 0.26s var(--ease-smooth) forwards;
+    }
+
+    @keyframes panelEnter {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Plynulý přechod obsahu záložek */
+    .pillar-workspace-animate {
+      animation: workspaceFade 0.22s var(--ease-smooth);
+    }
+
+    @keyframes workspaceFade {
+      from {
+        opacity: 0.45;
+        transform: translateY(4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ==========================================================================
+       3. VLASTNÍ RANGE SLIDERY (OKNO 3)
+       ========================================================================== */
+    input[type="range"].custom-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: linear-gradient(
+        to right,
+        var(--color-accent) 0%,
+        var(--color-accent) var(--slider-progress, 23%),
+        #e2e8f0 var(--slider-progress, 23%),
+        #e2e8f0 100%
+      );
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"].custom-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      border: 3px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+
+    input[type="range"].custom-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.12);
+      background: var(--color-accent-hover);
+    }
+
+    input[type="range"].custom-slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      border: 3px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+
+    /* ==========================================================================
+       4. ANIMACE PROGRESS BARŮ & VYSOUVACÍHO PANELU
+       ========================================================================== */
+    .ability-bar-fill {
+      transition: width 0.55s var(--ease-smooth);
+    }
+
+    .advisor-drawer {
+      box-shadow: var(--shadow-elevated);
+      transition: transform 0.3s var(--ease-smooth), opacity 0.25s ease;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-accent-tint selection:text-accent">
+
+  <!-- ==========================================================================
+       HLAVNÍ HORNÍ NAVIGACE
+       ========================================================================== -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[4rem] py-2 flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Identita aplikace -->
+      <div class="flex items-center gap-3 shrink-0">
+        <div class="w-9 h-9 rounded-xl bg-accent text-white flex items-center justify-center font-bold text-sm tracking-tight shadow-sm">
+          PL
+        </div>
+        <div>
+          <div class="text-sm sm:text-base font-semibold text-slate-900 leading-tight">Performance Lab</div>
+          <div class="text-[11px] text-slate-400 hidden sm:block">Sport, Výživa & Aktivní učení</div>
+        </div>
+      </div>
+
+      <!-- Hlavní přepínač pohledů -->
+      <nav aria-label="Hlavní přepínač pohledů" class="order-3 md:order-2 w-full md:w-auto flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80 overflow-x-auto no-scrollbar">
+        <button
+          type="button"
+          data-nav-view="training"
+          class="nav-view-btn flex-1 md:flex-initial px-3.5 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-150 whitespace-nowrap bg-white text-slate-900 shadow-sm"
+        >
+          Trénink & Sportovní profilace
+        </button>
+        <button
+          type="button"
+          data-nav-view="nutrition"
+          class="nav-view-btn flex-1 md:flex-initial px-3.5 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-150 whitespace-nowrap text-slate-600 hover:text-slate-900"
+        >
+          Výživa & Jídelníček
+        </button>
+      </nav>
+
+      <!-- Ovládání Aktivního učení a Poradního okna -->
+      <div class="order-2 md:order-3 flex items-center gap-2 shrink-0">
+        <!-- Indikátor naučených znalostí -->
+        <button
+          type="button"
+          id="nav-knowledge-trigger"
+          title="Zobrazit aktivně naučené poznatky a trendy"
+          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border border-emerald-200 bg-emerald-50/70 text-emerald-800 hover:bg-emerald-100/80 active:scale-[0.98] transition-all"
+        >
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="hidden sm:inline">Aktivní učení:</span>
+          <span id="nav-learned-count" class="font-bold tabular-nums">5</span>
+          <span class="hidden lg:inline">poznatků</span>
+        </button>
+
+        <!-- Tlačítko pro otevření Interaktivního poradního okna -->
+        <button
+          type="button"
+          id="nav-advisor-trigger"
+          aria-expanded="false"
+          aria-controls="window4-advisor-drawer"
+          class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium border border-slate-200 bg-white text-slate-700 hover:border-accent hover:text-accent active:scale-[0.98] transition-all shadow-sm"
+        >
+          <svg class="w-4 h-4 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+          </svg>
+          <span class="hidden sm:inline">Poradní okno (AI & Trendy)</span>
+          <span class="sm:hidden">Poradce</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       HLAVNÍ PRACOVNÍ KONTEJNER
+       ========================================================================== -->
+  <div id="app-layout-wrapper" class="flex-1 transition-all duration-300">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8">
+
+      <!-- **********************************************************************
+           POHLED A: TRÉNINK & SPORTOVNÍ PROFILACE (OKNO 1 + OKNO 2)
+           ********************************************************************** -->
+      <div id="view-training" class="view-panel is-active space-y-8">
+
+        <!-- ====================================================================
+             OKNO 1: TRÉNINKOVÉ PILÍŘE (5 PŘEPÍNATELNÝCH KARET S ODBORNÝMI DATY Z PDF)
+             ==================================================================== -->
+        <section id="window-1-pillars" aria-labelledby="w1-heading" class="app-card overflow-hidden">
+          <!-- Hlavička Okna 1 a lišta 5 záložek -->
+          <div class="p-5 sm:p-6 border-b border-slate-200/80 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold uppercase tracking-wider bg-accent-tint text-accent border border-accent-border">
+                  Okno 1
+                </span>
+                <h1 id="w1-heading" class="text-lg sm:text-xl font-semibold text-slate-900">
+                  Tréninkové pilíře
+                </h1>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                Odborná metodika ze sportovních skript, fyziologie zátěže, živé trendy a sestavení tréninkové jednotky.
+              </p>
+            </div>
+
+            <!-- 5 funkčních přepínatelných tlačítek / záložek -->
+            <div role="tablist" aria-label="Tréninkové pilíře" class="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl border border-slate-200/70 overflow-x-auto no-scrollbar">
+              <button type="button" role="tab" aria-selected="true" data-pillar-id="silovy" class="pillar-tab-btn px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all duration-150 bg-accent text-white shadow-sm">
+                Silový
+              </button>
+              <button type="button" role="tab" aria-selected="false" data-pillar-id="vytrvalostni" class="pillar-tab-btn px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all duration-150 text-slate-600 hover:text-slate-900 hover:bg-white/70">
+                Vytrvalostní
+              </button>
+              <button type="button" role="tab" aria-selected="false" data-pillar-id="vybusny" class="pillar-tab-btn px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all duration-150 text-slate-600 hover:text-slate-900 hover:bg-white/70">
+                Výbušný
+              </button>
+              <button type="button" role="tab" aria-selected="false" data-pillar-id="agility" class="pillar-tab-btn px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all duration-150 text-slate-600 hover:text-slate-900 hover:bg-white/70">
+                Agility
+              </button>
+              <button type="button" role="tab" aria-selected="false" data-pillar-id="koordinacni" class="pillar-tab-btn px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all duration-150 text-slate-600 hover:text-slate-900 hover:bg-white/70">
+                Koordinační
+              </button>
+            </div>
+          </div>
+
+          <!-- Indikátor aktuálně vybraného pilíře + Tlačítko pro aktivní vyhledání nových trendů -->
+          <div class="px-5 sm:px-6 py-3 bg-slate-50/80 border-b border-slate-200/70 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2 text-xs sm:text-sm">
+              <span class="w-2 h-2 rounded-full bg-accent"></span>
+              <span class="text-slate-500">Aktivní pilíř:</span>
+              <span id="w1-active-pillar-label" class="font-semibold text-slate-900">Silový pilíř</span>
+              <span id="w1-active-pillar-subtitle" class="hidden md:inline text-xs text-slate-400">• Překonávání, udržování a brzdění vnějšího odporu</span>
+            </div>
+            <button
+              type="button"
+              id="w1-discover-trends-btn"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white border border-accent-border text-accent hover:bg-accent-tint active:scale-[0.98] transition-all shadow-sm"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <span id="w1-discover-trends-text">Zjistit nové trendy & studie (AI)</span>
+            </button>
+          </div>
+
+          <!-- Dva jasně oddělené pracovní bloky -->
+          <div id="w1-workspace" class="p-5 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 pillar-workspace-animate">
+            
+            <!-- Blok 1A: Informace & Metodika (naplněno daty z PDF + naučenými trendy) -->
+            <div class="rounded-xl border border-slate-200 bg-white p-5 flex flex-col justify-between space-y-4">
+              <div class="space-y-3.5">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <div>
+                    <h2 class="text-sm sm:text-base font-semibold text-slate-900">Informace & Odborná metodika</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Syntéza studijních podkladů a fyziologie tréninku</p>
+                  </div>
+                  <span class="text-[11px] font-medium text-accent bg-accent-tint px-2.5 py-1 rounded-lg">
+                    Metodika
+                  </span>
+                </div>
+
+                <!-- 1. Definice & Fyziologický základ -->
+                <div class="info-box p-4">
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-xs font-semibold text-slate-800" id="w1-def-heading">Podstata & fyziologický základ</span>
+                    <span class="text-[10px] font-medium uppercase tracking-wider text-accent bg-accent-tint px-2 py-0.5 rounded">Fyziologie</span>
+                  </div>
+                  <p id="w1-def-body" class="text-xs sm:text-[13px] text-slate-600 leading-relaxed"></p>
+                </div>
+
+                <!-- 2. Metody & Parametry zatížení -->
+                <div class="info-box p-4">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-slate-800">Klíčové metody & parametry zatížení</span>
+                    <span class="text-[10px] font-medium uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded">Dávkování</span>
+                  </div>
+                  <div id="w1-params-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+                </div>
+
+                <!-- 3. Stavba jednotky, únava & zásady -->
+                <div class="info-box p-4">
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-xs font-semibold text-slate-800">Zásady zařazení, únava & časté chyby</span>
+                    <span class="text-[10px] font-medium uppercase tracking-wider text-amber-700 bg-amber-50 px-2 py-0.5 rounded">Praxe & CNS</span>
+                  </div>
+                  <ul id="w1-rules-list" class="text-xs text-slate-600 space-y-1.5 list-disc pl-4"></ul>
+                </div>
+
+                <!-- 4. Aktivně naučené trendy pro tento pilíř -->
+                <div class="rounded-xl border border-emerald-200/80 bg-emerald-50/40 p-4">
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-xs font-semibold text-emerald-900 flex items-center gap-1.5">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      Aktivní trendy & poznatky (Průběžně učené)
+                    </span>
+                    <span id="w1-pillar-trend-badge" class="text-[10px] font-medium text-emerald-700 bg-white px-2 py-0.5 rounded border border-emerald-200">Aktualizováno</span>
+                  </div>
+                  <div id="w1-pillar-trends-container" class="text-xs text-slate-700 space-y-2"></div>
+                </div>
+              </div>
+
+              <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                <span id="w1-source-note">Zdroj: Odborné podklady FTVS / Sportovní trénink</span>
+                <span class="text-accent font-medium">Modul 1A</span>
+              </div>
+            </div>
+
+            <!-- Blok 1B: Konfigurátor / Tvorba tréninku -->
+            <div class="rounded-xl border border-slate-200 bg-white p-5 flex flex-col justify-between space-y-4">
+              <div class="space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <div>
+                    <h2 class="text-sm sm:text-base font-semibold text-slate-900">Konfigurátor tréninkové jednotky</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Sestavení 3-fázové jednotky podle stavby sportovního tréninku</p>
+                  </div>
+                  <span class="text-[11px] font-medium text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">
+                    Jednotka (TJ)
+                  </span>
+                </div>
+
+                <!-- Ovládací prvky konfigurátoru -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <div>
+                    <label for="w1-config-level" class="block text-[11px] font-medium text-slate-600 mb-1">Úroveň sportovce</label>
+                    <select id="w1-config-level" class="w-full rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs text-slate-700 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 transition-all">
+                      <option value="zacatecnik">Začátečník</option>
+                      <option value="pokrocily" selected>Pokročilý</option>
+                      <option value="vykonnostni">Výkonnostní</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="w1-config-duration" class="block text-[11px] font-medium text-slate-600 mb-1">Délka jednotky</label>
+                    <select id="w1-config-duration" class="w-full rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs text-slate-700 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 transition-all">
+                      <option value="45">45 minut</option>
+                      <option value="60" selected>60 minut</option>
+                      <option value="90">90 minut</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="w1-config-period" class="block text-[11px] font-medium text-slate-600 mb-1">Období cyklu</label>
+                    <select id="w1-config-period" class="w-full rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs text-slate-700 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 transition-all">
+                      <option value="pripravne" selected>Přípravné období</option>
+                      <option value="predzavodni">Předzávodní (ladění)</option>
+                      <option value="zavodni">Hlavní / závodní</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Vygenerovaná struktura tréninkové jednotky (Přípravná -> Hlavní -> Závěrečná část) -->
+                <div id="w1-builder-slots" class="space-y-3"></div>
+              </div>
+
+              <!-- Akční lišta konfigurátoru -->
+              <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                <span id="w1-builder-feedback" class="text-[11px] text-slate-500">Pořadí v TJ: Koordinace → Rychlost → Síla → Vytrvalost</span>
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    id="w1-add-slot-btn"
+                    class="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-medium border border-slate-200 bg-white text-slate-700 hover:border-accent hover:text-accent active:scale-[0.98] transition-all"
+                  >
+                    <span>+ Vlastní blok</span>
+                  </button>
+                  <button
+                    type="button"
+                    id="w1-ai-session-btn"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium bg-accent text-white hover:bg-accent-hover active:scale-[0.98] transition-all shadow-sm"
+                  >
+                    <span>✨ AI trénink na míru</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             OKNO 2: ZASTOUPENÍ POHYBOVÝCH SCHOPNOSTÍ DLE SPORTU
+             ==================================================================== -->
+        <section id="window-2-sport-profile" aria-labelledby="w2-heading" class="app-card overflow-hidden">
+          <!-- Hlavička Okna 2 + Horní lišta s výběrem sportu -->
+          <div class="p-5 sm:p-6 border-b border-slate-200/80 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold uppercase tracking-wider bg-accent-tint text-accent border border-accent-border">
+                    Okno 2
+                  </span>
+                  <h2 id="w2-heading" class="text-lg sm:text-xl font-semibold text-slate-900">
+                    Zastoupení pohybových schopností dle sportu
+                  </h2>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                  Struktura sportovního výkonu: limitující a optimalizační podíl jednotlivých složek (součet 100 %).
+                </p>
+              </div>
+
+              <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200/80 self-start">
+                <span class="text-xs text-slate-500">Vybraný sport:</span>
+                <span id="w2-current-sport-badge" class="text-xs font-semibold text-accent">Tenis</span>
+              </div>
+            </div>
+
+            <!-- Ovládací lišta výběru sportu -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 pt-1">
+              
+              <!-- Rychlá tlačítka předvoleb -->
+              <div class="lg:col-span-5 flex flex-wrap items-center gap-1.5">
+                <button type="button" data-sport-preset="tenis" class="sport-preset-btn px-3 py-2 rounded-xl text-xs font-medium transition-all bg-accent text-white shadow-sm">
+                  Tenis
+                </button>
+                <button type="button" data-sport-preset="beh" class="sport-preset-btn px-3 py-2 rounded-xl text-xs font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200/70">
+                  Běh
+                </button>
+                <button type="button" data-sport-preset="silovy_trenink" class="sport-preset-btn px-3 py-2 rounded-xl text-xs font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200/70">
+                  Silový trénink
+                </button>
+                <button type="button" data-sport-preset="fotbal" class="sport-preset-btn px-3 py-2 rounded-xl text-xs font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200/70">
+                  Fotbal
+                </button>
+              </div>
+
+              <!-- Rozbalovací select menu -->
+              <div class="lg:col-span-3">
+                <label for="w2-sport-select" class="sr-only">Vyberte sport ze seznamu</label>
+                <select id="w2-sport-select" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs sm:text-sm text-slate-700 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 transition-all">
+                  <option value="tenis" selected>Tenis (multifaktoriální)</option>
+                  <option value="beh">Vytrvalostní běh (monofaktoriální)</option>
+                  <option value="silovy_trenink">Silový trénink / Vzpírání</option>
+                  <option value="fotbal">Fotbal (kolektivní)</option>
+                  <option value="hokej">Lední hokej</option>
+                  <option value="plavani">Plavání</option>
+                </select>
+              </div>
+
+              <!-- Vstupní pole pro zadání vlastního sportu -->
+              <form id="w2-custom-sport-form" class="lg:col-span-4 flex items-center gap-2">
+                <label for="w2-custom-sport-input" class="sr-only">Vlastní sport</label>
+                <input
+                  type="text"
+                  id="w2-custom-sport-input"
+                  placeholder="Zadejte vlastní sport (např. Judo, Golf)..."
+                  class="flex-1 min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 transition-all"
+                />
+                <button
+                  type="submit"
+                  id="w2-custom-sport-btn"
+                  class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium bg-slate-900 text-white hover:bg-slate-800 active:scale-[0.98] transition-all shrink-0"
+                >
+                  Analyzovat
+                </button>
+              </form>
+
+            </div>
+          </div>
+
+          <!-- Hlavní vizualizační plocha Okna 2 -->
+          <div class="p-5 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            
+            <!-- Levá část: Vizuální SVG Radarový graf -->
+            <div class="lg:col-span-5 flex flex-col items-center justify-center p-5 rounded-xl bg-slate-50/80 border border-slate-200/80">
+              <div class="w-full flex items-center justify-between mb-2">
+                <span class="text-xs font-semibold text-slate-700">Vizuální profil sportu</span>
+                <span class="text-[11px] font-medium text-accent bg-accent-tint px-2 py-0.5 rounded-md">Součet: 100 %</span>
+              </div>
+
+              <div class="w-full max-w-[260px] aspect-square flex items-center justify-center my-1">
+                <svg id="w2-radar-svg" viewBox="0 0 260 260" class="w-full h-full overflow-visible" aria-label="Graf zastoupení pohybových schopností">
+                  <polygon points="130,30 225,99 189,211 71,211 35,99" fill="none" stroke="#e2e8f0" stroke-width="1" />
+                  <polygon points="130,55 201,107 174,191 86,191 59,107" fill="none" stroke="#e2e8f0" stroke-width="1" />
+                  <polygon points="130,80 178,115 159,170 101,170 82,115" fill="none" stroke="#e2e8f0" stroke-width="1" />
+                  <polygon points="130,105 154,122 145,150 115,150 106,122" fill="none" stroke="#e2e8f0" stroke-width="1" />
+
+                  <line x1="130" y1="130" x2="130" y2="30" stroke="#e2e8f0" stroke-width="1" />
+                  <line x1="130" y1="130" x2="225" y2="99" stroke="#e2e8f0" stroke-width="1" />
+                  <line x1="130" y1="130" x2="189" y2="211" stroke="#e2e8f0" stroke-width="1" />
+                  <line x1="130" y1="130" x2="71" y2="211" stroke="#e2e8f0" stroke-width="1" />
+                  <line x1="130" y1="130" x2="35" y2="99" stroke="#e2e8f0" stroke-width="1" />
+
+                  <polygon
+                    id="w2-radar-polygon"
+                    points="130,80 185,112 165,178 92,182 72,111"
+                    fill="rgba(37, 99, 235, 0.16)"
+                    stroke="#2563eb"
+                    stroke-width="2.2"
+                    stroke-linejoin="round"
+                  />
+
+                  <text x="130" y="18" text-anchor="middle" class="fill-slate-600 text-[10px] font-medium">Silový</text>
+                  <text x="234" y="98" text-anchor="start" class="fill-slate-600 text-[10px] font-medium">Vytrval.</text>
+                  <text x="196" y="227" text-anchor="middle" class="fill-slate-600 text-[10px] font-medium">Výbušný</text>
+                  <text x="64" y="227" text-anchor="middle" class="fill-slate-600 text-[10px] font-medium">Agility</text>
+                  <text x="26" y="98" text-anchor="end" class="fill-slate-600 text-[10px] font-medium">Koordin.</text>
+                </svg>
+              </div>
+
+              <p id="w2-sport-note" class="text-[11px] text-slate-500 text-center leading-relaxed">
+                Tenis je multifaktoriální sport: rozhoduje hbitost (agility), reakce, koordinace úderu a opakovaná výbušnost.
+              </p>
+            </div>
+
+            <!-- Pravá část: Animované procentuální ukazatele -->
+            <div class="lg:col-span-7 space-y-3.5">
+              <div class="flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-slate-900">Procentuální podíl schopností</h3>
+                <span id="w2-profile-type-note" class="text-xs text-slate-400">Odborný profil výkonu</span>
+              </div>
+
+              <div id="w2-bars-container" class="space-y-3">
+                <div class="p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+                  <div class="flex items-center justify-between text-xs sm:text-sm mb-1.5">
+                    <span class="font-medium text-slate-800">Silový (maximální & stabilizační)</span>
+                    <span id="w2-val-silovy" class="font-semibold text-accent tabular-nums">15 %</span>
+                  </div>
+                  <div class="w-full h-2.5 bg-slate-200/80 rounded-full overflow-hidden">
+                    <div id="w2-bar-silovy" class="ability-bar-fill h-full bg-accent rounded-full" style="width: 15%"></div>
+                  </div>
+                </div>
+
+                <div class="p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+                  <div class="flex items-center justify-between text-xs sm:text-sm mb-1.5">
+                    <span class="font-medium text-slate-800">Vytrvalostní (aerobní i laktátová)</span>
+                    <span id="w2-val-vytrvalostni" class="font-semibold text-accent tabular-nums">20 %</span>
+                  </div>
+                  <div class="w-full h-2.5 bg-slate-200/80 rounded-full overflow-hidden">
+                    <div id="w2-bar-vytrvalostni" class="ability-bar-fill h-full bg-accent rounded-full" style="width: 20%"></div>
+                  </div>
+                </div>
+
+                <div class="p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+                  <div class="flex items-center justify-between text-xs sm:text-sm mb-1.5">
+                    <span class="font-medium text-slate-800">Výbušný (RFD, odraz, rychlá síla)</span>
+                    <span id="w2-val-vybusny" class="font-semibold text-accent tabular-nums">20 %</span>
+                  </div>
+                  <div class="w-full h-2.5 bg-slate-200/80 rounded-full overflow-hidden">
+                    <div id="w2-bar-vybusny" class="ability-bar-fill h-full bg-accent rounded-full" style="width: 20%"></div>
+                  </div>
+                </div>
+
+                <div class="p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+                  <div class="flex items-center justify-between text-xs sm:text-sm mb-1.5">
+                    <span class="font-medium text-slate-800">Agility (rychlé změny směru & reakce)</span>
+                    <span id="w2-val-agility" class="font-semibold text-accent tabular-nums">25 %</span>
+                  </div>
+                  <div class="w-full h-2.5 bg-slate-200/80 rounded-full overflow-hidden">
+                    <div id="w2-bar-agility" class="ability-bar-fill h-full bg-accent rounded-full" style="width: 25%"></div>
+                  </div>
+                </div>
+
+                <div class="p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+                  <div class="flex items-center justify-between text-xs sm:text-sm mb-1.5">
+                    <span class="font-medium text-slate-800">Koordinační (řízení pohybu & pohyblivost)</span>
+                    <span id="w2-val-koordinacni" class="font-semibold text-accent tabular-nums">20 %</span>
+                  </div>
+                  <div class="w-full h-2.5 bg-slate-200/80 rounded-full overflow-hidden">
+                    <div id="w2-bar-koordinacni" class="ability-bar-fill h-full bg-accent rounded-full" style="width: 20%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </div>
+
+      <!-- **********************************************************************
+           POHLED B: VÝŽIVA & JÍDELNÍČEK (OKNO 3 – SROZUMITELNÉ & PLNĚ FUNKČNÍ)
+           ********************************************************************** -->
+      <div id="view-nutrition" class="view-panel">
+        <section id="window-3-nutrition" aria-labelledby="w3-heading" class="app-card overflow-hidden">
+          
+          <!-- Hlavička Okna 3 -->
+          <div class="p-5 sm:p-6 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold uppercase tracking-wider bg-accent-tint text-accent border border-accent-border">
+                  Okno 3
+                </span>
+                <h1 id="w3-heading" class="text-lg sm:text-xl font-semibold text-slate-900">
+                  Srozumitelný jídelníček na míru
+                </h1>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                Jednoduše zadejte svůj běžný den a pohyb – aplikace spočítá kalorie, živiny i konkrétní denní jídla lidskou řečí.
+              </p>
+            </div>
+            <span id="w3-status-badge" class="text-xs font-medium text-accent bg-accent-tint border border-accent-border px-3 py-1.5 rounded-xl self-start">
+              Jídelníček připraven
+            </span>
+          </div>
+
+          <!-- Dvousloupcový pracovní prostor: Levý formulář + Pravý výstup -->
+          <div class="grid grid-cols-1 lg:grid-cols-12">
+            
+            <!-- LEVÝ PANEL: Srozumitelné vstupní parametry -->
+            <form id="w3-nutrition-form" class="lg:col-span-5 p-5 sm:p-6 border-b lg:border-b-0 lg:border-r border-slate-200/80 bg-slate-50/40 space-y-5">
+              
+              <!-- 1. Věk & Hmotnost vedle sebe pro přesný a srozumitelný výpočet -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <div class="flex items-center justify-between mb-1.5">
+                    <label for="w3-age-slider" class="text-xs font-medium text-slate-700">Váš věk</label>
+                    <span id="w3-age-display" class="text-xs font-semibold text-accent bg-accent-tint px-2 py-0.5 rounded-md border border-accent-border tabular-nums">
+                      28 let
+                    </span>
+                  </div>
+                  <input type="range" id="w3-age-slider" min="15" max="80" value="28" class="custom-slider" />
+                  <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                    <span>15 let</span>
+                    <span>80 let</span>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex items-center justify-between mb-1.5">
+                    <label for="w3-weight-slider" class="text-xs font-medium text-slate-700">Tělesná váha</label>
+                    <span id="w3-weight-display" class="text-xs font-semibold text-accent bg-accent-tint px-2 py-0.5 rounded-md border border-accent-border tabular-nums">
+                      75 kg
+                    </span>
+                  </div>
+                  <input type="range" id="w3-weight-slider" min="45" max="135" value="75" class="custom-slider" />
+                  <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                    <span>45 kg</span>
+                    <span>135 kg</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. Sport / pohybová aktivita -->
+              <div>
+                <label for="w3-sport-input" class="block text-xs sm:text-sm font-medium text-slate-700 mb-1.5">
+                  Jaký sport nebo pohyb děláte?
+                </label>
+                <input
+                  type="text"
+                  id="w3-sport-input"
+                  value="Tenis"
+                  placeholder="Např. Tenis, Běh, Posilovna, Turistika, Bez sportu..."
+                  class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 transition-all"
+                />
+              </div>
+
+              <!-- 3. Denní vytížení s lidským vysvětlením -->
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="text-xs sm:text-sm font-medium text-slate-700">Jak náročný je váš běžný den?</span>
+                </div>
+                <div id="w3-workload-group" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <button type="button" data-workload="Nízké" class="w3-workload-btn text-left p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-slate-300 transition-all">
+                    <div class="text-xs font-semibold">Pohodový / sedavý den</div>
+                    <div class="text-[11px] text-slate-400 leading-tight mt-0.5">Kancelář, auto, max. krátká procházka</div>
+                  </button>
+                  <button type="button" data-workload="Střední" class="w3-workload-btn active text-left p-2.5 rounded-xl border border-accent bg-accent-tint text-accent transition-all">
+                    <div class="text-xs font-semibold">Běžný aktivní den</div>
+                    <div class="text-[11px] text-accent/80 leading-tight mt-0.5">Chůze + 1 trénink (cca 3–4× týdně)</div>
+                  </button>
+                  <button type="button" data-workload="Vysoké" class="w3-workload-btn text-left p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-slate-300 transition-all">
+                    <div class="text-xs font-semibold">Fyzicky náročný den</div>
+                    <div class="text-[11px] text-slate-400 leading-tight mt-0.5">Manuální práce nebo těžký trénink každý den</div>
+                  </button>
+                  <button type="button" data-workload="Dvoufázové" class="w3-workload-btn text-left p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-slate-300 transition-all">
+                    <div class="text-xs font-semibold">Dva tréninky v jeden den</div>
+                    <div class="text-[11px] text-slate-400 leading-tight mt-0.5">Tzv. dvoufázové vytížení (např. ráno běh + odpoledne sport)</div>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 4. Cíl s jasným popisem -->
+              <div>
+                <span class="block text-xs sm:text-sm font-medium text-slate-700 mb-1.5">Čeho chcete jídelníčkem dosáhnout?</span>
+                <div id="w3-goal-group" class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <button type="button" data-goal="Redukce" class="w3-goal-btn text-left p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-slate-300 transition-all">
+                    <div class="text-xs font-semibold">Zdravě zhubnout</div>
+                    <div class="text-[10px] text-slate-400 leading-tight mt-0.5">Spalovat tuk bez hladovění</div>
+                  </button>
+                  <button type="button" data-goal="Udržení" class="w3-goal-btn active text-left p-2.5 rounded-xl border border-accent bg-accent-tint text-accent transition-all">
+                    <div class="text-xs font-semibold">Udržet váhu & energii</div>
+                    <div class="text-[10px] text-accent/80 leading-tight mt-0.5">Stabilní forma a regenerace</div>
+                  </button>
+                  <button type="button" data-goal="Výkon / Nárůst" class="w3-goal-btn text-left p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-slate-300 transition-all">
+                    <div class="text-xs font-semibold">Nabrat svaly & výkon</div>
+                    <div class="text-[10px] text-slate-400 leading-tight mt-0.5">Více energie a bílkovin</div>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 5. Stravovací omezení / preference -->
+              <div class="space-y-2">
+                <span class="block text-xs sm:text-sm font-medium text-slate-700">Stravovací omezení nebo přání</span>
+                <div id="w3-restrictions-group" class="flex flex-wrap gap-1.5">
+                  <button type="button" data-restriction="Bez laktózy" class="w3-chip-btn px-3 py-1.5 rounded-full text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition-all">
+                    Bez laktózy (bez mléka)
+                  </button>
+                  <button type="button" data-restriction="Bez lepku" class="w3-chip-btn px-3 py-1.5 rounded-full text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition-all">
+                    Bez lepku
+                  </button>
+                  <button type="button" data-restriction="Vegetarián" class="w3-chip-btn px-3 py-1.5 rounded-full text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition-all">
+                    Bez masa (Vegetarián)
+                  </button>
+                  <button type="button" data-restriction="Vegan" class="w3-chip-btn px-3 py-1.5 rounded-full text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition-all">
+                    Čistě rostlinná (Vegan)
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  id="w3-custom-note"
+                  placeholder="Vlastní poznámka (např. nejím ryby, rychlá příprava do 15 min)..."
+                  class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs text-slate-700 placeholder:text-slate-400 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 transition-all"
+                />
+              </div>
+
+              <!-- Hlavní akční tlačítka -->
+              <div class="pt-1 flex flex-col sm:flex-row gap-2">
+                <button
+                  type="submit"
+                  class="flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold bg-accent text-white hover:bg-accent-hover active:scale-[0.99] transition-all shadow-sm flex items-center justify-center gap-2"
+                >
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <span>Vygenerovat / Aktualizovat</span>
+                </button>
+                <button
+                  type="button"
+                  id="w3-ai-menu-btn"
+                  class="py-2.5 px-3.5 rounded-xl text-xs font-semibold border border-accent-border bg-accent-tint text-accent hover:bg-blue-100/80 active:scale-[0.99] transition-all flex items-center justify-center gap-1.5 shrink-0"
+                  title="Nechat AI sestavit originální jídelníček podle vašich poznámek"
+                >
+                  <span>✨ AI varianta</span>
+                </button>
+              </div>
+
+            </form>
+
+            <!-- PRAVÝ PANEL: Plně funkční výstupní okno jídelníčku -->
+            <div class="lg:col-span-7 p-5 sm:p-6 space-y-5 bg-white">
+              
+              <!-- Srozumitelné vysvětlení nastavení pro běžného uživatele -->
+              <div id="w3-output-banner" class="rounded-xl border border-accent-border bg-accent-tint/50 p-4 space-y-1.5">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <span class="text-xs font-semibold text-slate-900" id="w3-summary-title">
+                    Doporučení pro: 28 let, 75 kg • Tenis (Udržet váhu & energii)
+                  </span>
+                  <button type="button" id="w3-shuffle-btn" class="text-xs font-medium text-accent hover:text-accent-hover underline underline-offset-2">
+                    Obměnit recepty
+                  </button>
+                </div>
+                <p id="w3-plain-explanation" class="text-xs text-slate-600 leading-relaxed"></p>
+              </div>
+
+              <!-- 4 KPI karty energie a makroživin -->
+              <div>
+                <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2.5">
+                  Váš denní příjem energie a živin
+                </h2>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div class="rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm">
+                    <div class="text-[11px] font-medium text-slate-500">Celková energie</div>
+                    <div id="w3-kpi-kcal" class="text-lg sm:text-xl font-bold text-slate-900 mt-1 tabular-nums">2 550 kcal</div>
+                    <div id="w3-kpi-kcal-sub" class="text-[10px] text-slate-400 mt-0.5">Palivo na celý den</div>
+                  </div>
+                  <div class="rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm">
+                    <div class="text-[11px] font-medium text-slate-500">Bílkoviny</div>
+                    <div id="w3-kpi-protein" class="text-lg sm:text-xl font-bold text-accent mt-1 tabular-nums">135 g</div>
+                    <div id="w3-kpi-protein-sub" class="text-[10px] text-slate-400 mt-0.5">1,8 g / kg • Svaly a obnova</div>
+                  </div>
+                  <div class="rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm">
+                    <div class="text-[11px] font-medium text-slate-500">Sacharidy</div>
+                    <div id="w3-kpi-carbs" class="text-lg sm:text-xl font-bold text-slate-900 mt-1 tabular-nums">325 g</div>
+                    <div id="w3-kpi-carbs-sub" class="text-[10px] text-slate-400 mt-0.5">4,3 g / kg • Energie na pohyb</div>
+                  </div>
+                  <div class="rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm">
+                    <div class="text-[11px] font-medium text-slate-500">Zdravé tuky</div>
+                    <div id="w3-kpi-fats" class="text-lg sm:text-xl font-bold text-slate-900 mt-1 tabular-nums">78 g</div>
+                    <div id="w3-kpi-fats-sub" class="text-[10px] text-slate-400 mt-0.5">1,0 g / kg • Hormony a zdraví</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 5 konkrétních denních chodů -->
+              <div>
+                <div class="flex items-center justify-between mb-2.5">
+                  <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                    Konkrétní návrh denních jídel (5 chodů)
+                  </h2>
+                  <span id="w3-restriction-tag" class="text-[11px] text-slate-500">Klasická vyvážená strava</span>
+                </div>
+                <div id="w3-meals-list" class="space-y-2.5"></div>
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ==========================================================================
+       OKNO 4: INTERAKTIVNÍ PORADNÍ OKNO & AKTIVNÍ UČENÍ (VYSOUVACÍ / PŘIPNUTELNÝ PANEL)
+       ========================================================================== -->
+  <div id="advisor-backdrop" class="fixed inset-0 bg-slate-900/20 backdrop-blur-[1px] z-40 hidden transition-opacity"></div>
+
+  <aside
+    id="window4-advisor-drawer"
+    aria-label="Interaktivní poradní okno a aktivní učení"
+    class="advisor-drawer fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] bg-white border-l border-slate-200 flex flex-col translate-x-full"
+  >
+    <!-- Hlavička poradního panelu -->
+    <div class="p-4 sm:p-5 border-b border-slate-200 bg-white space-y-3">
+      <div class="flex items-center justify-between gap-2">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-accent-tint text-accent border border-accent-border">
+              Okno 4
+            </span>
+            <h2 class="text-sm sm:text-base font-semibold text-slate-900">Poradce & Aktivní učení</h2>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-0.5">AI konzultant s vyhledáváním trendů a pamětí</p>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <button
+            type="button"
+            id="advisor-pin-btn"
+            title="Připnout panel vedle obsahu"
+            class="hidden lg:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-slate-200 text-slate-600 hover:border-accent hover:text-accent transition-all"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+            </svg>
+            <span id="advisor-pin-label">Připnout</span>
+          </button>
+
+          <button
+            type="button"
+            id="advisor-close-btn"
+            aria-label="Zavřít poradní okno"
+            class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Přepínač záložek uvnitř Okna 4: Chat vs. Aktivně naučené poznatky -->
+      <div class="grid grid-cols-2 gap-1 bg-slate-100 p-1 rounded-xl">
+        <button type="button" data-drawer-tab="chat" class="drawer-tab-btn py-1.5 px-2.5 rounded-lg text-xs font-medium bg-white text-slate-900 shadow-sm transition-all">
+          Dotazy & Úpravy
+        </button>
+        <button type="button" data-drawer-tab="knowledge" class="drawer-tab-btn py-1.5 px-2.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition-all flex items-center justify-center gap-1.5">
+          <span>Naučené trendy</span>
+          <span id="drawer-learned-badge" class="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-100 text-emerald-800 font-semibold">5</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ZÁLOŽKA 4A: CHAT A ÚPRAVY -->
+    <div id="drawer-panel-chat" class="flex-1 flex flex-col min-h-0">
+      <div id="advisor-messages" class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 bg-slate-50/60">
+        <div class="flex flex-col items-start max-w-[90%]">
+          <div class="rounded-2xl rounded-tl-sm bg-white border border-slate-200 px-3.5 py-2.5 text-xs sm:text-[13px] text-slate-700 shadow-sm leading-relaxed">
+            Jsem připraven! Znám kompletní metodiku z vašich studijních materiálů (silový, vytrvalostní, výbušný, agility i koordinační trénink) a umím na webu vyhledávat nejnovější trendy nebo upravit váš jídelníček.
+          </div>
+          <span class="text-[10px] text-slate-400 mt-1 ml-1">AI Poradce • Online & Učící se</span>
+        </div>
+      </div>
+
+      <!-- Rychlé akční štítky -->
+      <div class="px-4 py-2 border-t border-slate-100 bg-white flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+        <button type="button" data-quick-prompt="Uprav jídelníček na bezlepkový a přepočítej ho" class="advisor-quick-chip shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium bg-slate-100 text-slate-600 hover:bg-accent-tint hover:text-accent transition-colors">
+          Nastavit bezlepkový jídelníček
+        </button>
+        <button type="button" data-quick-prompt="Jaké jsou nejnovější trendy v tréninku výbušné síly?" class="advisor-quick-chip shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium bg-slate-100 text-slate-600 hover:bg-accent-tint hover:text-accent transition-colors">
+          Trendy ve výbušné síle
+        </button>
+        <button type="button" data-quick-prompt="Vysvětli mi jednoduše, jak řadit cvičení v tréninku" class="advisor-quick-chip shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium bg-slate-100 text-slate-600 hover:bg-accent-tint hover:text-accent transition-colors">
+          Pořadí cvičení v tréninku
+        </button>
+      </div>
+
+      <!-- Vstupní formulář -->
+      <form id="advisor-form" class="p-4 border-t border-slate-200 bg-white flex items-center gap-2">
+        <label for="advisor-input" class="sr-only">Napište dotaz nebo požadavek na úpravu</label>
+        <input
+          type="text"
+          id="advisor-input"
+          placeholder="Zeptejte se nebo zadejte úpravu..."
+          autocomplete="off"
+          class="flex-1 min-w-0 rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 transition-all"
+        />
+        <button
+          type="submit"
+          id="advisor-submit-btn"
+          class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium bg-accent text-white hover:bg-accent-hover active:scale-[0.98] transition-all shadow-sm shrink-0"
+        >
+          Odeslat
+        </button>
+      </form>
+    </div>
+
+    <!-- ZÁLOŽKA 4B: AKTIVNÍ UČENÍ & ZNALOSTNÍ BÁZE -->
+    <div id="drawer-panel-knowledge" class="hidden flex-1 flex-col min-h-0 bg-slate-50/60">
+      <div class="p-4 border-b border-slate-200 bg-white space-y-2.5">
+        <p class="text-xs text-slate-600 leading-relaxed">
+          Aplikace se průběžně učí z vašich dotazů, vybraných sportů a aktivně vyhledává ověřené trendy z webu (ukládá se v prohlížeči).
+        </p>
+        <button
+          type="button"
+          id="knowledge-scan-all-btn"
+          class="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.99] transition-all shadow-sm flex items-center justify-center gap-2"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <span id="knowledge-scan-btn-text">Vyhledat nové trendy pro všechna témata</span>
+        </button>
+      </div>
+
+      <div id="knowledge-items-list" class="flex-1 overflow-y-auto p-4 space-y-2.5"></div>
+    </div>
+  </aside>
+
+  <!-- Plovoucí toast notifikace (nahrazuje jakýkoliv alert) -->
+  <div id="app-toast" class="fixed bottom-4 left-4 z-50 max-w-sm pointer-events-none opacity-0 translate-y-2 transition-all duration-200">
+    <div class="rounded-xl bg-slate-900 text-white px-4 py-3 text-xs sm:text-sm shadow-lg flex items-center gap-2.5">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+      <span id="app-toast-text">Aktualizováno</span>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODULÁRNÍ JAVASCRIPT
+       ========================================================================== -->
+  <script>
+    /**
+     * Pomocná funkce pro neblokující notifikaci (Toast)
+     */
+    const Toast = (() => {
+      let timer = null;
+      const el = document.getElementById('app-toast');
+      const textEl = document.getElementById('app-toast-text');
+
+      function show(message) {
+        if (!el || !textEl) return;
+        textEl.textContent = message;
+        el.classList.remove('opacity-0', 'translate-y-2');
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          el.classList.add('opacity-0', 'translate-y-2');
+        }, 3200);
+      }
+
+      return { show };
+    })();
+
+    /**
+     * ==========================================================================
+     * MODUL AI & AKTIVNÍ UČENÍ: ActiveKnowledgeEngine
+     * Komunikuje s Gemini API (gemini-3-flash-preview + Google Search grounding),
+     * průběžně ukládá zjištěné trendy a uživatelské preference do localStorage.
+     * ==========================================================================
+     */
+    const ActiveKnowledgeEngine = (() => {
+      const STORAGE_KEY = 'performance_lab_learned_knowledge_v1';
+      const PROFILE_KEY = 'performance_lab_user_profile_v1';
+
+      // Výchozí naučené moderní trendy pro jednotlivé pilíře (seed)
+      const defaultTrends = [
+        {
+          id: 'seed-silovy',
+          pillar: 'silovy',
+          pillarLabel: 'Silový pilíř',
+          title: 'Velocity-Based Training (VBT) a práh poklesu rychlosti',
+          summary: 'Moderní silový trénink sleduje rychlost činky a ukončuje sérii při poklesu rychlosti o 10–20 % (buffer RIR 1–3), čímž chrání CNS před zbytečnou únavou.',
+          sourceTitle: 'Odborné podklady: Silové schopnosti (kap. 5.5)',
+          sourceUrl: '',
+          timestamp: 'Základní znalost'
+        },
+        {
+          id: 'seed-vytrvalostni',
+          pillar: 'vytrvalostni',
+          pillarLabel: 'Vytrvalostní pilíř',
+          title: 'Polarizovaný model tréninku & laktátový práh (ANP)',
+          summary: 'Kombinace velkého objemu v nízké aerobní zóně (pod AeP) a cílených úseků na úrovni ANP (~82–85 % VO2max, ~4 mmol/l laktátu) posouvá laktátovou křivku vpravo.',
+          sourceTitle: 'Odborné podklady: Vytrvalostní schopnosti (kap. 5–7)',
+          sourceUrl: '',
+          timestamp: 'Základní znalost'
+        },
+        {
+          id: 'seed-vybusny',
+          pillar: 'vybusny',
+          pillarLabel: 'Výbušný pilíř',
+          title: 'Postaktivační potenciace (PAP) – kontrastní metoda',
+          summary: 'Spojení těžkého silového cviku (cca 80 % 1RM) s následným explozivním výskokem po pauze 1–2 min zvyšuje nábor rychlých vláken (FG) a RFD.',
+          sourceTitle: 'Odborné podklady: Silové schopnosti (kap. 7.4)',
+          sourceUrl: '',
+          timestamp: 'Základní znalost'
+        },
+        {
+          id: 'seed-agility',
+          pillar: 'agility',
+          pillarLabel: 'Agility pilíř',
+          title: 'Kognitivně-reakční agility místo mechanického běhu po žebříku',
+          summary: 'Přenos z rovného sprintu do změn směru je minimální. Moderní agility spojuje rychlou změnu směru (COD) s reakcí na nečekaný zrakový či sluchový podnět.',
+          sourceTitle: 'Odborné podklady: Rychlostní schopnosti (kap. 4.4 & 5.3)',
+          sourceUrl: '',
+          timestamp: 'Základní znalost'
+        },
+        {
+          id: 'seed-koordinacni',
+          pillar: 'koordinacni',
+          pillarLabel: 'Koordinační pilíř',
+          title: 'Trénink pod časoprostorovým tlakem a PNF strečink',
+          summary: 'Rozvoj koordinace vyžaduje měnící se podmínky, dodatečné informace během pohybu a paralelní úlohy. Pro pohyblivost dominuje metoda PNF (kontrakce 12–15 s, relaxace 3–5 s).',
+          sourceTitle: 'Odborné podklady: Koordinační schopnosti a pohyblivost',
+          sourceUrl: '',
+          timestamp: 'Základní znalost'
+        }
+      ];
+
+      let learnedItems = [];
+      const listeners = [];
+
+      function loadFromStorage() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              learnedItems = parsed;
+              return;
+            }
+          }
+        } catch (e) {
+          // Ignorovat chybu úložiště
+        }
+        learnedItems = [...defaultTrends];
+        saveToStorage();
+      }
+
+      function saveToStorage() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(learnedItems.slice(0, 40)));
+        } catch (e) {
+          // Ignorovat chybu úložiště
+        }
+        notifyListeners();
+      }
+
+      function notifyListeners() {
+        const countEl = document.getElementById('nav-learned-count');
+        const badgeEl = document.getElementById('drawer-learned-badge');
+        if (countEl) countEl.textContent = String(learnedItems.length);
+        if (badgeEl) badgeEl.textContent = String(learnedItems.length);
+        listeners.forEach((fn) => fn(learnedItems));
+      }
+
+      function onChange(fn) {
+        listeners.push(fn);
+      }
+
+      function addInsight({ pillar = 'obecne', pillarLabel = 'Obecné', title, summary, sourceTitle = 'Aktivní průzkum AI + Web', sourceUrl = '' }) {
+        const cleanTitle = (title || '').trim();
+        const cleanSummary = (summary || '').trim();
+        if (!cleanTitle || !cleanSummary) return;
+
+        // Zamezení duplicitám podle titulku
+        const exists = learnedItems.some((item) => item.title.toLowerCase() === cleanTitle.toLowerCase());
+        if (exists) return;
+
+        const now = new Date().toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
+        learnedItems.unshift({
+          id: 'learn-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+          pillar,
+          pillarLabel,
+          title: cleanTitle,
+          summary: cleanSummary,
+          sourceTitle,
+          sourceUrl,
+          timestamp: now
+        });
+
+        saveToStorage();
+      }
+
+      function getInsightsForPillar(pillarId) {
+        return learnedItems.filter((item) => item.pillar === pillarId);
+      }
+
+      function getAllInsights() {
+        return [...learnedItems];
+      }
+
+      function saveUserProfile(partial) {
+        try {
+          const current = getUserProfile();
+          const updated = { ...current, ...partial, updatedAt: Date.now() };
+          localStorage.setItem(PROFILE_KEY, JSON.stringify(updated));
+        } catch (e) {}
+      }
+
+      function getUserProfile() {
+        try {
+          const raw = localStorage.getItem(PROFILE_KEY);
+          return raw ? JSON.parse(raw) : {};
+        } catch (e) {
+          return {};
+        }
+      }
+
+      // Volání Gemini API s exponenciálním backoffem a Google Search groundingem
+      async function queryGemini({ prompt, systemInstruction, useSearch = true, jsonSchema = null }) {
+        const apiKey = "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+        const payload = {
+          contents: [{ parts: [{ text: prompt }] }],
+        };
+
+        if (systemInstruction) {
+          payload.systemInstruction = { parts: [{ text: systemInstruction }] };
+        }
+
+        if (useSearch && !jsonSchema) {
+          payload.tools = [{ google_search: {} }];
+        }
+
+        if (jsonSchema) {
+          payload.generationConfig = {
+            responseMimeType: "application/json",
+            responseSchema: jsonSchema
+          };
+        }
+
+        const delays = [1000, 2000, 4000];
+        let lastErr = null;
+
+        for (let attempt = 0; attempt <= delays.length; attempt++) {
+          try {
+            const response = await fetch(apiUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}`);
+            }
+
+            const result = await response.json();
+            const candidate = result.candidates?.[0];
+            const text = candidate?.content?.parts?.[0]?.text || '';
+
+            let sources = [];
+            const meta = candidate?.groundingMetadata;
+            if (meta?.groundingAttributions) {
+              sources = meta.groundingAttributions
+                .map((a) => ({ uri: a.web?.uri, title: a.web?.title }))
+                .filter((s) => s.uri && s.title);
+            } else if (meta?.groundingChunks) {
+              sources = meta.groundingChunks
+                .map((c) => ({ uri: c.web?.uri, title: c.web?.title }))
+                .filter((s) => s.uri && s.title);
+            }
+
+            return { text, sources };
+          } catch (err) {
+            lastErr = err;
+            if (attempt < delays.length) {
+              await new Promise((res) => setTimeout(res, delays[attempt]));
+            }
+          }
+        }
+
+        throw lastErr || new Error('Chyba spojení s AI');
+      }
+
+      // Aktivní průzkum trendů pro konkrétní téma / pilíř
+      async function discoverTrendsForTopic(pillarId, pillarLabel, topicDescription) {
+        const prompt = `Vyhledej na internetu 2 nejnovější vědecké nebo tréninkové trendy pro oblast: "${pillarLabel}" (${topicDescription}).
+Odpověz česky, srozumitelně a stručně ve formátu dvou odrážek:
+1. [Název trendu]: [2 věty praktického vysvětlení pro sportovce i trenéra]
+2. [Název trendu]: [2 věty praktického vysvětlení pro sportovce i trenéra]`;
+
+        const systemInstruction = "Jsi odborný sportovní fyziolog a kondiční trenér. Využívej vyhledávání na webu pro aktuální poznatky ze sportovní vědy.";
+
+        const { text, sources } = await queryGemini({ prompt, systemInstruction, useSearch: true });
+        const primarySource = sources[0] || { title: 'Webový průzkum (Google Search)', uri: '' };
+
+        // Rozparsování odrážek a uložení do znalostní báze
+        const lines = text.split('\n').map((l) => l.trim()).filter((l) => /^[12•\-*]/.test(l));
+        if (lines.length > 0) {
+          lines.slice(0, 2).forEach((line) => {
+            const cleaned = line.replace(/^[12•\-*.)\s]+/, '');
+            const colonIdx = cleaned.indexOf(':');
+            const title = colonIdx > 3 && colonIdx < 80 ? cleaned.slice(0, colonIdx).replace(/\*\*/g, '') : `Trend: ${pillarLabel}`;
+            const summary = colonIdx > 3 && colonIdx < 80 ? cleaned.slice(colonIdx + 1).replace(/\*\*/g, '').trim() : cleaned.replace(/\*\*/g, '');
+            addInsight({
+              pillar: pillarId,
+              pillarLabel,
+              title,
+              summary,
+              sourceTitle: primarySource.title,
+              sourceUrl: primarySource.uri
+            });
+          });
+        } else if (text) {
+          addInsight({
+            pillar: pillarId,
+            pillarLabel,
+            title: `Aktuální poznatek (${pillarLabel})`,
+            summary: text.slice(0, 260).replace(/\*\*/g, ''),
+            sourceTitle: primarySource.title,
+            sourceUrl: primarySource.uri
+          });
+        }
+
+        return { text, sources };
+      }
+
+      loadFromStorage();
+
+      return {
+        onChange,
+        addInsight,
+        getInsightsForPillar,
+        getAllInsights,
+        saveUserProfile,
+        getUserProfile,
+        queryGemini,
+        discoverTrendsForTopic
+      };
+    })();
+
+
+    /**
+     * ==========================================================================
+     * MODUL 0: AppNavigation
+     * ==========================================================================
+     */
+    const AppNavigation = (() => {
+      const state = { activeView: 'training' };
+      const viewButtons = document.querySelectorAll('.nav-view-btn');
+      const panels = {
+        training: document.getElementById('view-training'),
+        nutrition: document.getElementById('view-nutrition'),
+      };
+
+      function switchView(viewKey) {
+        if (!panels[viewKey] || state.activeView === viewKey) return;
+        state.activeView = viewKey;
+
+        viewButtons.forEach((btn) => {
+          const isTarget = btn.dataset.navView === viewKey;
+          btn.classList.toggle('bg-white', isTarget);
+          btn.classList.toggle('text-slate-900', isTarget);
+          btn.classList.toggle('shadow-sm', isTarget);
+          btn.classList.toggle('text-slate-600', !isTarget);
+        });
+
+        Object.entries(panels).forEach(([key, panel]) => {
+          panel.classList.toggle('is-active', key === viewKey);
+        });
+      }
+
+      function init() {
+        viewButtons.forEach((btn) => {
+          btn.addEventListener('click', () => switchView(btn.dataset.navView));
+        });
+      }
+
+      return { init, switchView, getState: () => ({ ...state }) };
+    })();
+
+
+    /**
+     * ==========================================================================
+     * MODUL 1: Window1Pillars
+     * Obsahuje kompletní odbornou metodiku z přiložených PDF přednášek
+     * (Silové schopnosti, Vytrvalostní schopnosti, Rychlostní schopnosti,
+     * Koordinační schopnosti a pohyblivost, Stavba sportovního tréninku)
+     * a plně funkční konfigurátor tréninkové jednotky.
+     * ==========================================================================
+     */
+    const Window1Pillars = (() => {
+      const pillarsData = {
+        silovy: {
+          label: 'Silový pilíř',
+          shortName: 'Silový',
+          subtitle: '• Překonávání, udržování a brzdění vnějšího odporu pomocí svalového úsilí',
+          source: 'Zdroj: Podklady – Silové schopnosti & Stavba sportovního tréninku',
+          definition: 'Silové schopnosti jsou strukturální pohybovou schopností. Síla nevzniká jen objemem svalu (hypertrofií), ale především řízením centrální nervové soustavy (CNS): náborem motorických jednotek (Hennemanův velikostní princip: SO → FOG → FG), frekvencí vzruchů a mezisvalovou koordinací. Adaptace probíhá postupně: nejprve technická (1.–3. týden), poté nervová (4.–8. týden) a až následně morfologická hypertrofie (10.–12. týden).',
+          parameters: [
+            { title: 'Maximální síla (85–100 % 1RM)', desc: '1–3 opakování, 3–6 sérií, pauza 3–5 min pro plnou obnovu CNS. Vysoký nábor motorických jednotek.' },
+            { title: 'Opakovaná síla (70–85 % 1RM)', desc: '6–12 opakování, 3–5 sérií, pauza 1–3 min. Základní stavební metoda pro myofibrilární hypertrofii.' },
+            { title: 'Brzděná / excentrická (120–150 %)', desc: 'Spouštění zátěže 3–6 s, 3–6 opakování, pauza 3–5 min. Zesílení šlach a prevence zranění.' },
+            { title: 'Vytrvalostní síla (30–60 % 1RM)', desc: '15–40+ opakování nebo kruhový trénink, pauzy 30–90 s. Kapilarizace a tolerance laktátu.' },
+          ],
+          rules: [
+            'Kvalita před kvantitou: sérii ukončete s rezervou 1–3 opakování (RIR), než se rozpadne technika.',
+            'Pořadí v tréninku: silová cvičení zařazujte až po koordinačních a rychlostních úkolech, ale před vytrvalostí.',
+            'Reziduální efekt síly přetrvává cca 14 dní – poté je nutné stimul obnovit.',
+            'Častá chyba: Začátečníci nesmí začínat metodou maximálních úsilí (95 %+) bez zvládnutí techniky (1.–3. týden).'
+          ],
+          builderTemplates: {
+            pripravna: {
+              zacatecnik: 'Kloubní mobilizace (8 min) → aktivace hlubokého stabilizačního systému a hýždí → zapracování s vlastní vahou do TF ~140 tepů/min.',
+              pokrocily: 'Dynamická mobilizace kyčlí a hrudní páteře → aktivace CNS a CORE → průpravné série základních vícekloubových cviků se zvyšující se zátěží.',
+              vykonnostni: 'Cílená mobilizace + aktivace agonistů → postaktivační příprava (3×3 lehké dynamické opakování) → zapracování do pracovní intenzity.'
+            },
+            hlavni: {
+              zacatecnik: 'Metoda opakovaných úsilí (učení techniky): 3–4 vícekloubové cviky (dřep, tlak, tah, vzpor), 3 série × 10–12 opakování (65–70 % 1RM), kontrolované tempo, pauza 2 min.',
+              pokrocily: 'Kombinace základní a intermediární síly: Dřep + Benchpress / Přítahy 4 série × 6–8 opakování (75–82 % 1RM) s 2s izometrickou stopkou ve spodní fázi, pauza 2,5–3 min.',
+              vykonnostni: 'Metoda maximálních úsilí + kontrast: 4–5 sérií × 2–3 opakování (88–95 % 1RM), plná koncentrace, pauza 4 min + doplňková excentrická kontrola (4 s spouštění).'
+            },
+            zaverecna: 'Zklidnění srdeční frekvence (4 min chůze/kolo) → kompenzační uvolnění přetížených antagonistů → pasivní statický strečink (výdrž 25–30 s na partii).'
+          }
+        },
+        vytrvalostni: {
+          label: 'Vytrvalostní pilíř',
+          shortName: 'Vytrvalostní',
+          subtitle: '• Schopnost odolávat únavě a udržet požadovanou intenzitu výkonu v čase',
+          source: 'Zdroj: Podklady – Vytrvalostní schopnosti & Stavba sportovního tréninku',
+          definition: 'Vytrvalost propojuje energetiku (transport a využití O2, mitochondrie, oxidativní fosforylace), regulační systémy a psychickou odolnost. Klíčový je rozdíl mezi aerobním výkonem (VO2max – strop spotřeby kyslíku) a aerobní kapacitou (% VO2max udržitelné dlouhodobě). Zásadním orientačním bodem je Anaerobní práh (ANP, typicky ~82–85 % VO2max a ~4 mmol/l laktátu).',
+          parameters: [
+            { title: 'Souvislá metoda (Aerobní základ)', desc: '≥ 30–90 min v aerobní zóně (TF ~130–150). Vložit 4–5× 10–15s „kreatinovou forsáž“ proti fixaci tempa.' },
+            { title: 'Prahové úseky (ANP)', desc: '3–4× 8–20 min v intenzitě ANP (~82–85 % VO2max), pauza 1:2 pasivně. Nejlepší kompromis pro VO2max i kapacitu.' },
+            { title: 'Klasický interval (VO2max)', desc: '10–25× 90 s při TF ~180, aktivní pauza do poklesu TF na 120–140 tepů/min (max. 1:1, tj. ≤ 90 s).' },
+            { title: 'Krátkodobá laktátová vytrvalost', desc: '4–6× 60–120 s velmi vysoká intenzita (laktát 10–12 mmol/l), lehce aktivní pauza 1:3 → 1:1,5.' },
+          ],
+          rules: [
+            'V hlavní části tréninkové jednotky se vytrvalost řadí až na konec (po koordinaci, rychlosti a síle).',
+            'Vysoká specifičnost: anaerobní práh i ekonomika pohybu jsou odlišné pro běh, kolo i plavání.',
+            'Pořadí pauz v laktátovém tréninku: laktát vrcholí 3.–5. minutu po zátěži – další úsek startujte až za vrcholem.',
+            'Častá chyba: Běhání „všech tréninků středně těžce“ (zóna nikoho) – nevede ani k růstu kapacity, ani VO2max.'
+          ],
+          builderTemplates: {
+            pripravna: {
+              zacatecnik: 'Pozvolné rozklusání / rozjetí 8 min (TF do 125 tepů/min) → dynamická mobilizace kotníků a kyčlí → 3× 60 m stupňovaný běh.',
+              pokrocily: 'Aerobní zapracování 10 min (50–60 % VO2max) → běžecká abeceda a mobilizace → 4× 80 m rovinky s důrazem na ekonomiku kroku.',
+              vykonnostni: '12 min stupňované zapracování do TF ~145 → specifická dynamická příprava → 4× 15 s v závodním tempu.'
+            },
+            hlavni: {
+              zacatecnik: 'Souvislá aerobní metoda: 30–40 min plynulého pohybu v aerobní zóně (TF 135–150 tepů/min, lze mluvit ve větách) + 3× 10 s lehké zrychlení uprostřed.',
+              pokrocily: 'Střídavá metoda (Fartlek) / Prahové bloky: 3× 10 min v tempu anaerobního prahu (ANP, ~82 % VO2max), mezi bloky 4 min lehký klus.',
+              vykonnostni: 'Klasická intervalová metoda pro VO2max: 12–15× 90 s vysoká intenzita (TF ~178–185), aktivní mezichůze/klus do poklesu TF na 130 (max. 90 s).'
+            },
+            zaverecna: 'Vyklusání / vyjetí 6–10 min nízkou intenzitou (podpora odbourávání laktátu v játrech a SO vláknech) → dechové zklidnění a protažení dolních končetin (30 s).'
+          }
+        },
+        vybusny: {
+          label: 'Výbušný pilíř',
+          shortName: 'Výbušný',
+          subtitle: '• Rychlé dosažení maximálního úsilí „z nuly“ (RFD) a využití elastické energie',
+          source: 'Zdroj: Podklady – Silové schopnosti (kap. 7) & Sportovní výkon a jeho struktura',
+          definition: 'Výbušná síla (explosive strength) vyjadřuje schopnost vyvinout co nejvyšší napětí v prvních milisekundách kontrakce (Rate of Force Development – RFD). Opírá se o okamžitou synchronizaci rychlých motorických jednotek (FG), myotatický reflex a cyklus protažení–zkrácení (SSC – rychlý přechod z excentrické do koncentrické fáze). Platí pravidlo: „Výbušný výkon bez základní síly je jako dům bez základů.“',
+          parameters: [
+            { title: 'Metoda rázová (Plyometrie)', desc: 'Seskoky, přeskoky, odrazy a odhody s minimální dobou kontaktu se zemí (využití SSC reflexu).' },
+            { title: 'Rychlá síla (30–60 % 1RM)', desc: '6–10 opakování maximální rychlostí zrychlení, 3–6 sérií, pauza 1,5–3 min. Neúnavové provedení!' },
+            { title: 'Kontrastní metoda (PAP)', desc: 'Těžký cvik (80 % 1RM, 2–3 opak.) → 1–2 min pauza → explozivní skok/odhod (postaktivační potenciace).' },
+            { title: 'Odporová dynamika (40–70 % 1RM)', desc: '4–8 opakování, 3–6 sérií, pauza 2–4 min. Odporové gumy, medicinbaly nebo sprintové saně.' },
+          ],
+          rules: [
+            'Nikdy necvičte výbušnou sílu v únavě! Jakmile zpomalí pohyb, končí tréninkový efekt.',
+            'Plná regenerace CNS mezi sériemi (2–4 min) je klíčová pro udržení frekvence nervových impulzů.',
+            'Výbušný trénink má smysl zařazovat až po vybudování základní síly a technické stability dopadů.',
+            'Častá chyba: Příliš vysoký počet opakování v sérii změní výbušný trénink na laktátovou vytrvalost.'
+          ],
+          builderTemplates: {
+            pripravna: {
+              zacatecnik: 'Zahřátí 8 min → mobilizace kotníků, kolen a kyčlí → nácvik měkkého a stabilního dopadu (tlumení do podřepu).',
+              pokrocily: 'Dynamické rozcvičení + aktivace lýtek a hýždí → 3× 20 m skipink a odpichy → 3 přípravné submaximální výskoky.',
+              vykonnostni: 'Komplexní neuromuskulární aktivace → krátké plyometrické poskoky na místě (2×10) → 2× 15 m akcelerační start.'
+            },
+            hlavni: {
+              zacatecnik: 'Základy výbušnosti & odhodů: 4 série × 5 výskoků na nízkou bednu (plná pauza po každém skoku) + 4× 6 explozivních odhodů medicinbalu, pauza 2,5 min.',
+              pokrocily: 'Plyometrie + Rychlá síla: 4 série × 5 překážkových přeskoků (krátký kontakt) + 4× 6 výskoků s lehkou zátěží (30 % 1RM), pauza 3 min.',
+              vykonnostni: 'Kontrastní metoda (PAP): 4 série × [3 dřepy s 80 % 1RM → pauza 90 s → 4 maximální hloubkové seskoky s okamžitým výskokem], pauza mezi sériemi 4 min.'
+            },
+            zaverecna: 'Lehké vyklusání 5 min → uvolnění Achillových šlach, lýtek a bedrokyčlostehenních svalů → kompenzační dýchání.'
+          }
+        },
+        agility: {
+          label: 'Agility pilíř',
+          shortName: 'Agility',
+          subtitle: '• Rychlé změny směru, akcelerace a kognitivní reakce na podněty (ATP-CP)',
+          source: 'Zdroj: Podklady – Složky sportovního tréninku, kondiční příprava a rychlostní schopnosti',
+          definition: 'Rychlostní schopnosti a agility jsou hybridní schopností spojující energetiku (ATP-CP systém, který stačí jen na 5–10 s maximálního výkonu) a bleskové řízení CNS. Skutečná agility není jen mechanické obíhání kuželů, ale schopnost změnit směr a tempo v reakci na vnější signál (soupeře, míč, světlo). Přenos mezi rovným sprintem a „cik-cak“ pohybem je minimální!',
+          parameters: [
+            { title: 'Doba zatížení & Intenzita', desc: '5–10 sekund (výjimečně do 15 s) v 100% maximální intenzitě. Počet opakování v sérii: 2–6.' },
+            { title: 'Odpočinek (Obnova CP)', desc: '2–4 minuty aktivního odpočinku (poměr 1:10 až 1:12) – resyntéza kreatinfosfátu trvá > 3 minuty.' },
+            { title: 'Reakční & rozhodovací cvičení', desc: 'Opakovací, analytická a senzorická metoda – reakce na zrakový, zvukový či kinestetický signál.' },
+            { title: 'Kontrast & Supramax (105–108 %)', desc: 'Odpor → volný sprint, nebo lehký běh z mírného kopce / s tažnou gumou k prolomení rychlostní bariéry.' },
+          ],
+          rules: [
+            'Zařazujte vždy na úplný začátek hlavní části tréninkové jednotky v plně odpočatém stavu.',
+            'Respektujte pauzy > 3 min! Bez nich klesá hladina CP i acetylcholinu na nervosvalové ploténce.',
+            'Rychlostní bariéra (stagnace ze stereotypu): řeší se „rozbitím“ (nový podnět, kontrast) nebo „vyhasnutím“ (4–6 týdnů pauza od sprintů a posílení síly a koordinace).',
+            'Častá chyba: Běhání dlouhých žebříků 30–40 s v kuse bez pauzy – to už není agility, ale anaerobní vytrvalost.'
+          ],
+          builderTemplates: {
+            pripravna: {
+              zacatecnik: 'Zahřátí 8 min → dynamická mobilizace kyčlí a kotníků → nácvik brzdění a nízkého těžiště při změně směru v 70 % rychlosti.',
+              pokrocily: 'Rozklusání + specifická práce nohou (frekvenční žebřík 2×10 s) → 3× 15 m stupňovaná akcelerace → reakční starty ze stoje.',
+              vykonnostni: 'Dynamická příprava kloubů + aktivace adduktorů a gluteů → frekvenční drily (3× 6 s max. frekvence) → 2× 10 m výbušné starty.'
+            },
+            hlavni: {
+              zacatecnik: 'Základy akcelerace a změn směru: 5× 15 m „T-test“ / slalom s důrazem na nízké těžiště při brzdění (doba práce ~6 s), aktivní pauza 2,5 min.',
+              pokrocily: 'Reakční agility (cik-cak): 2 série × 4 opakování (6–8 s) – sprint 5 m → reakce na barevný/hlasový signál trenéra → únik 10 m, pauza 3 min.',
+              vykonnostni: 'Kontrastní agility pod tlakem: 2 série × 4 opakování – 4 s tah odporovou gumou → okamžité uvolnění a reakční změna směru o 90°/180° (celkem 8 s), pauza 3,5 min.'
+            },
+            zaverecna: '5 min lehký výklus (aktivní obnova pro rychlejší odplavení zbytkového laktátu) → uvolnění třísel, hamstringů a lýtek.'
+          }
+        },
+        koordinacni: {
+          label: 'Koordinační pilíř (& Pohyblivost)',
+          shortName: 'Koordinační',
+          subtitle: '• Přesné řízení pohybu CNS, rovnováha, rytmus, řetězení a kloubní pohyblivost',
+          source: 'Zdroj: Podklady – Koordinační schopnosti a pohyblivost',
+          definition: 'Koordinační schopnosti představují „řidičské dovednosti“ centrální nervové soustavy – schopnost účelně zvládat složité pohyby, rychle se přizpůsobovat změnám a učit se novým prvkům (docilita). Zahrnují 8 projevů: rovnováhu, orientaci v prostoru a čase, spojování pohybů, diferenciaci (přesnost), rytmus, přizpůsobivost, volbu správné reakce a učivost. Úzce navazuje pohyblivost (aktivní i pasivní rozsah kloubů).',
+          parameters: [
+            { title: '7 zásad tvorby cvičení', desc: 'Rotace, arytmie, asynchronie, asymetrie, obměny (nedominantní strana), změna povrchu a dodatečná informace.' },
+            { title: 'Řetězení činností', desc: 'Sériové (těsně navazující prvky, např. kotoul → výskok → přihrávka) a paralelní (dvě nezávislé činnosti současně).' },
+            { title: 'Cvičení pod tlakem', desc: 'Časový tlak, prostorové omezení, omezení smyslů (bez zraku) nebo soutěžní/psychický tlak.' },
+            { title: 'Pohyblivost & PNF metoda', desc: 'Před zátěží krátce 6–10 s; po zátěži staticky 20–30 s; pro zvětšení rozsahu PNF (kontrakce 12–15 s → relaxace 3–5 s → posun).' },
+          ],
+          rules: [
+            'Zařazujte hned na začátek hlavní části TJ, dokud je CNS čerstvá a schopná tvořit nové motorické programy.',
+            'U paralelních úloh (např. driblink 2 míči + čtení signálů) vždy nejprve dokonale zvládněte dílčí prvky odděleně.',
+            'Strečink provádějte vždy pod prahem bolesti a s plynulým výdechem – bolest spustí ochrannou reflexní kontrakci svalových vřetének.',
+            'Častá chyba: Opakování stále stejného žebříku zpaměti – jakmile se pohyb zautomatizuje bez nových podnětů, přestává rozvíjet koordinaci.'
+          ],
+          builderTemplates: {
+            pripravna: {
+              zacatecnik: 'Kloubní mobilizace shora dolů (6 min) → hry na vnímání rovnováhy na jedné noze → jednoduché rytmické poskoky.',
+              pokrocily: 'Prohřátí + krátké aktivní výdrže (6–8 s) → balanční průprava se zavřenýma očima → asynchronní pohyby paží a nohou.',
+              vykonnostni: 'Komplexní mobilizace + dynamická stabilizace → cvičení na nestabilní ploše s manipulací s míčem → reakční podněty.'
+            },
+            hlavni: {
+              zacatecnik: 'Sériové řetězení & rovnováha: Obratnostní dráha (přeskok → obrat o 180° → přesná přihrávka na cíl), 4 série s obměnou dominantní a nedominantní strany.',
+              pokrocily: 'Paralelní koordinace & dodatečná informace: Driblink / manipulace s míčem na balanční podložce + reakce na vizuální/sluchový povel během pohybu (4× 45 s, pauza 60 s).',
+              vykonnostni: 'Koordinace pod časoprostorovým tlakem: Akrobaticko-herní řada (kotoul/rotace → výskok → zachycení míče v letu a zakončení na signál trenéra), 5 sérií × 4 opakování.'
+            },
+            zaverecna: 'Cílený rozvoj pohyblivosti (PNF metoda): 2–3 cykly na zkrácené partie (12 s izometrický tlak → 4 s relaxace → prohloubení rozsahu s výdechem) + celkové zklidnění.'
+          }
+        }
+      };
+
+      const state = {
+        activePillar: 'silovy',
+        customBlocks: [],
+      };
+
+      const tabButtons = document.querySelectorAll('.pillar-tab-btn');
+      const workspaceEl = document.getElementById('w1-workspace');
+      const activeLabelEl = document.getElementById('w1-active-pillar-label');
+      const activeSubEl = document.getElementById('w1-active-pillar-subtitle');
+      const defBodyEl = document.getElementById('w1-def-body');
+      const paramsGridEl = document.getElementById('w1-params-grid');
+      const rulesListEl = document.getElementById('w1-rules-list');
+      const trendsContainerEl = document.getElementById('w1-pillar-trends-container');
+      const sourceNoteEl = document.getElementById('w1-source-note');
+      const builderSlotsEl = document.getElementById('w1-builder-slots');
+
+      const levelSelect = document.getElementById('w1-config-level');
+      const durationSelect = document.getElementById('w1-config-duration');
+      const periodSelect = document.getElementById('w1-config-period');
+
+      const addSlotBtn = document.getElementById('w1-add-slot-btn');
+      const aiSessionBtn = document.getElementById('w1-ai-session-btn');
+      const discoverTrendsBtn = document.getElementById('w1-discover-trends-btn');
+      const discoverTrendsText = document.getElementById('w1-discover-trends-text');
+
+      function renderPillarTrends(pillarId) {
+        const trends = ActiveKnowledgeEngine.getInsightsForPillar(pillarId);
+        if (!trends.length) {
+          trendsContainerEl.innerHTML = `<p class="text-slate-500 italic">Zatím žádné uložené trendy. Klikněte nahoře na „Zjistit nové trendy“.</p>`;
+          return;
+        }
+
+        trendsContainerEl.innerHTML = trends.slice(0, 2).map((t) => `
+          <div class="bg-white/90 rounded-lg p-2.5 border border-emerald-200/70">
+            <div class="font-semibold text-slate-800 text-xs">${t.title}</div>
+            <p class="text-[11px] text-slate-600 mt-0.5 leading-relaxed">${t.summary}</p>
+            <div class="mt-1 flex items-center justify-between text-[10px] text-slate-400">
+              <span>${t.sourceUrl ? `<a href="${t.sourceUrl}" target="_blank" rel="noopener noreferrer" class="text-accent hover:underline">${t.sourceTitle} ↗</a>` : t.sourceTitle}</span>
+              <span>${t.timestamp}</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      function renderBuilderUnit() {
+        const data = pillarsData[state.activePillar];
+        const level = levelSelect.value;
+        const duration = Number(durationSelect.value);
+        const period = periodSelect.value;
+
+        const prepTime = duration === 45 ? '10 min' : duration === 60 ? '12–15 min' : '15–20 min';
+        const mainTime = duration === 45 ? '28 min' : duration === 60 ? '35–40 min' : '55–60 min';
+        const coolTime = duration === 45 ? '7 min' : duration === 60 ? '8–10 min' : '10–12 min';
+
+        const periodNote = period === 'pripravne'
+          ? 'Přípravné období: důraz na budování základu, techniku a postupný objem.'
+          : period === 'predzavodni'
+          ? 'Předzávodní období: nižší objem, vyšší specifičnost a závodní intenzita (tapering).'
+          : 'Závodní období: udržení výkonnosti, vysoká kvalita a rychlá regenerace.';
+
+        const customHTML = state.customBlocks.map((b, idx) => `
+          <div class="info-box p-3.5 border-accent-border bg-accent-tint/30 flex items-start justify-between gap-3">
+            <div>
+              <div class="text-xs font-semibold text-slate-800">${idx + 4}. Vlastní blok: ${b.title}</div>
+              <div class="text-[11px] text-slate-600 mt-0.5 leading-relaxed">${b.desc}</div>
+            </div>
+            <span class="text-[10px] font-semibold text-accent bg-white px-2 py-0.5 rounded border border-accent-border shrink-0">${b.time}</span>
+          </div>
+        `).join('');
+
+        builderSlotsEl.innerHTML = `
+          <div class="rounded-lg bg-slate-50 border border-slate-200/80 px-3 py-2 text-[11px] text-slate-600">
+            <strong class="text-slate-800">Kontext cyklu:</strong> ${periodNote}
+          </div>
+
+          <div class="info-box p-3.5">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <span class="text-xs font-semibold text-slate-800">1. Přípravná část (Zahřátí, mobilizace, aktivace)</span>
+              <span class="text-[11px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200 shrink-0">${prepTime}</span>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">${data.builderTemplates.pripravna[level]}</p>
+          </div>
+
+          <div class="info-box p-3.5 border-l-4 border-l-accent">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <span class="text-xs font-semibold text-slate-900">2. Hlavní část – ${data.shortName} rozvoj</span>
+              <span class="text-[11px] font-mono text-accent bg-accent-tint px-2 py-0.5 rounded border border-accent-border shrink-0">${mainTime}</span>
+            </div>
+            <p class="text-xs text-slate-700 leading-relaxed">${data.builderTemplates.hlavni[level]}</p>
+          </div>
+
+          <div class="info-box p-3.5">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <span class="text-xs font-semibold text-slate-800">3. Závěrečná část (Zklidnění & kompenzace)</span>
+              <span class="text-[11px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200 shrink-0">${coolTime}</span>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">${data.builderTemplates.zaverecna}</p>
+          </div>
+
+          ${customHTML}
+        `;
+      }
+
+      function selectPillar(pillarId) {
+        const data = pillarsData[pillarId];
+        if (!data) return;
+        state.activePillar = pillarId;
+        state.customBlocks = [];
+
+        tabButtons.forEach((btn) => {
+          const isSelected = btn.dataset.pillarId === pillarId;
+          btn.setAttribute('aria-selected', String(isSelected));
+          btn.classList.toggle('bg-accent', isSelected);
+          btn.classList.toggle('text-white', isSelected);
+          btn.classList.toggle('shadow-sm', isSelected);
+          btn.classList.toggle('text-slate-600', !isSelected);
+          btn.classList.toggle('hover:text-slate-900', !isSelected);
+          btn.classList.toggle('hover:bg-white/70', !isSelected);
+        });
+
+        activeLabelEl.textContent = data.label;
+        activeSubEl.textContent = data.subtitle;
+        sourceNoteEl.textContent = data.source;
+        defBodyEl.textContent = data.definition;
+
+        paramsGridEl.innerHTML = data.parameters.map((p) => `
+          <div class="rounded-lg bg-white border border-slate-200/90 p-2.5">
+            <div class="text-[11px] font-semibold text-slate-800">${p.title}</div>
+            <div class="text-[11px] text-slate-500 mt-0.5 leading-snug">${p.desc}</div>
+          </div>
+        `).join('');
+
+        rulesListEl.innerHTML = data.rules.map((r) => `<li>${r}</li>`).join('');
+
+        renderPillarTrends(pillarId);
+        renderBuilderUnit();
+
+        workspaceEl.classList.remove('pillar-workspace-animate');
+        void workspaceEl.offsetWidth;
+        workspaceEl.classList.add('pillar-workspace-animate');
+      }
+
+      async function handleDiscoverTrends() {
+        const data = pillarsData[state.activePillar];
+        discoverTrendsBtn.disabled = true;
+        discoverTrendsText.textContent = 'Hledám trendy na webu...';
+
+        try {
+          await ActiveKnowledgeEngine.discoverTrendsForTopic(
+            state.activePillar,
+            data.label,
+            data.subtitle
+          );
+          renderPillarTrends(state.activePillar);
+          Toast.show(`Nové trendy pro „${data.label}“ byly nalezeny a uloženy!`);
+        } catch (err) {
+          Toast.show('Nepodařilo se spojit s webovým vyhledáváním, zobrazuji uložené poznatky.');
+        } finally {
+          discoverTrendsBtn.disabled = false;
+          discoverTrendsText.textContent = 'Zjistit nové trendy & studie (AI)';
+        }
+      }
+
+      async function handleGenerateAiSession() {
+        const data = pillarsData[state.activePillar];
+        const levelText = levelSelect.options[levelSelect.selectedIndex].text;
+        const duration = durationSelect.value;
+        const periodText = periodSelect.options[periodSelect.selectedIndex].text;
+        const sport = document.getElementById('w2-current-sport-badge')?.textContent || 'všeobecný sport';
+
+        aiSessionBtn.disabled = true;
+        aiSessionBtn.textContent = 'Sestavuji AI blok...';
+
+        try {
+          const prompt = `Vytvoř 1 konkrétní, odborný a praktický doplňkový tréninkový blok (3–4 věty, konkrétní cviky, série, opakování a pauzy) pro:
+- Pilíř: ${data.label}
+- Sport: ${sport}
+- Úroveň: ${levelText}
+- Období: ${periodText} (délka TJ ${duration} min)
+Vycházej ze zásad sportovního tréninku (fyziologie, odpočinek, kvalita provedení). Piš česky, bez markdown nadpisů.`;
+
+          const { text } = await ActiveKnowledgeEngine.queryGemini({
+            prompt,
+            systemInstruction: "Jsi špičkový kondiční trenér. Navrhuješ přesné, bezpečné a fyziologicky podložené tréninkové bloky.",
+            useSearch: false
+          });
+
+          if (text) {
+            state.customBlocks.push({
+              title: `AI specializace (${sport})`,
+              desc: text.replace(/\*\*/g, '').trim(),
+              time: '15 min'
+            });
+            renderBuilderUnit();
+            ActiveKnowledgeEngine.addInsight({
+              pillar: state.activePillar,
+              pillarLabel: data.label,
+              title: `Tréninkový blok: ${data.shortName} pro ${sport}`,
+              summary: text.replace(/\*\*/g, '').slice(0, 220) + '...',
+              sourceTitle: 'Vygenerováno v Konfigurátoru TJ',
+              sourceUrl: ''
+            });
+            Toast.show('AI tréninkový blok byl přidán do jednotky!');
+          }
+        } catch (err) {
+          state.customBlocks.push({
+            title: `Doplňkový blok (${data.shortName})`,
+            desc: `3 série × 6–8 opakování specifického cvičení pro ${sport} s důrazem na techniku a plnou regeneraci mezi sériemi.`,
+            time: '12 min'
+          });
+          renderBuilderUnit();
+          Toast.show('Přidán doplňkový tréninkový blok.');
+        } finally {
+          aiSessionBtn.disabled = false;
+          aiSessionBtn.innerHTML = '<span>✨ AI trénink na míru</span>';
+        }
+      }
+
+      function init() {
+        tabButtons.forEach((btn) => {
+          btn.addEventListener('click', () => selectPillar(btn.dataset.pillarId));
+        });
+
+        [levelSelect, durationSelect, periodSelect].forEach((sel) => {
+          sel.addEventListener('change', renderBuilderUnit);
+        });
+
+        addSlotBtn.addEventListener('click', () => {
+          const data = pillarsData[state.activePillar];
+          state.customBlocks.push({
+            title: `Doplňkový blok (${data.shortName})`,
+            desc: 'Vlastní prostor pro 2–3 doplňková cvičení dle aktuálního pocitu a únavy (RPE).',
+            time: '10 min'
+          });
+          renderBuilderUnit();
+          Toast.show('Přidán vlastní blok do tréninkové jednotky.');
+        });
+
+        aiSessionBtn.addEventListener('click', handleGenerateAiSession);
+        discoverTrendsBtn.addEventListener('click', handleDiscoverTrends);
+
+        ActiveKnowledgeEngine.onChange(() => {
+          renderPillarTrends(state.activePillar);
+        });
+
+        selectPillar('silovy');
+      }
+
+      return { init, selectPillar, getActivePillar: () => state.activePillar };
+    })();
+
+
+    /**
+     * ==========================================================================
+     * MODUL 2: Window2SportProfile
+     * ==========================================================================
+     */
+    const Window2SportProfile = (() => {
+      const sportPresets = {
+        tenis: {
+          name: 'Tenis',
+          note: 'Tenis je multifaktoriální sport: rozhoduje hbitost (agility), reakce, koordinace úderu a opakovaná výbušnost.',
+          values: { silovy: 15, vytrvalostni: 20, vybusny: 20, agility: 25, koordinacni: 20 },
+        },
+        beh: {
+          name: 'Vytrvalostní běh',
+          note: 'Monofaktoriální vytrvalostní výkon: limitujícím faktorem je VO2max, anaerobní práh (ANP) a ekonomika běhu.',
+          values: { silovy: 15, vytrvalostni: 50, vybusny: 10, agility: 10, koordinacni: 15 },
+        },
+        silovy_trenink: {
+          name: 'Silový trénink / Vzpírání',
+          note: 'Dominuje maximální a výbušná síla (nábor rychlých vláken FG, RFD) spolu s přesnou mezisvalovou koordinací.',
+          values: { silovy: 45, vytrvalostni: 10, vybusny: 25, agility: 5, koordinacni: 15 },
+        },
+        fotbal: {
+          name: 'Fotbal',
+          note: 'Kolektivní interakční sport: vyžaduje vysokou vytrvalostní kapacitu (VO2max 60–65 ml/kg/min) i opakované sprinty a změny směru.',
+          values: { silovy: 15, vytrvalostni: 30, vybusny: 20, agility: 20, koordinacni: 15 },
+        },
+        hokej: {
+          name: 'Lední hokej',
+          note: 'Střídání v krátkých intervalech maximální intenzity (ATP-CP a laktát), výbušné starty, rovnováha na bruslích a rychlá reakce.',
+          values: { silovy: 20, vytrvalostni: 20, vybusny: 25, agility: 15, koordinacni: 20 },
+        },
+        plavani: {
+          name: 'Plavání',
+          note: 'Rozhoduje vytrvalostní kapacita, silová vytrvalost horní poloviny těla, kloubní pohyblivost ramen a hydrodynamická koordinace.',
+          values: { silovy: 25, vytrvalostni: 40, vybusny: 15, agility: 5, koordinacni: 15 },
+        },
+      };
+
+      const presetButtons = document.querySelectorAll('.sport-preset-btn');
+      const selectEl = document.getElementById('w2-sport-select');
+      const customForm = document.getElementById('w2-custom-sport-form');
+      const customInput = document.getElementById('w2-custom-sport-input');
+      const customBtn = document.getElementById('w2-custom-sport-btn');
+      const badgeEl = document.getElementById('w2-current-sport-badge');
+      const noteEl = document.getElementById('w2-profile-type-note');
+      const sportNoteEl = document.getElementById('w2-sport-note');
+      const polygonEl = document.getElementById('w2-radar-polygon');
+
+      function updateRadarPolygon(values) {
+        const cx = 130;
+        const cy = 130;
+        const maxRadius = 96;
+        const scale = (pct) => Math.min(maxRadius, Math.max(16, (pct / 50) * maxRadius));
+
+        const anglesDeg = [-90, -18, 54, 126, 198];
+        const keys = ['silovy', 'vytrvalostni', 'vybusny', 'agility', 'koordinacni'];
+
+        const points = keys.map((key, idx) => {
+          const rad = (anglesDeg[idx] * Math.PI) / 180;
+          const r = scale(values[key]);
+          const x = (cx + r * Math.cos(rad)).toFixed(1);
+          const y = (cy + r * Math.sin(rad)).toFixed(1);
+          return `${x},${y}`;
+        });
+
+        polygonEl.setAttribute('points', points.join(' '));
+      }
+
+      function applyProfile(sportName, values, noteText, isCustom = false, presetKey = null) {
+        badgeEl.textContent = sportName;
+        noteEl.textContent = isCustom ? 'AI analýza struktury výkonu (100 %)' : 'Odborný profil výkonu';
+        if (noteText) sportNoteEl.textContent = noteText;
+
+        presetButtons.forEach((btn) => {
+          const isActive = !isCustom && btn.dataset.sportPreset === presetKey;
+          btn.classList.toggle('bg-accent', isActive);
+          btn.classList.toggle('text-white', isActive);
+          btn.classList.toggle('shadow-sm', isActive);
+          btn.classList.toggle('bg-slate-100', !isActive);
+          btn.classList.toggle('text-slate-700', !isActive);
+        });
+
+        if (!isCustom && presetKey && selectEl.querySelector(`option[value="${presetKey}"]`)) {
+          selectEl.value = presetKey;
+        }
+
+        Object.entries(values).forEach(([abilityKey, pct]) => {
+          const barEl = document.getElementById(`w2-bar-${abilityKey}`);
+          const valEl = document.getElementById(`w2-val-${abilityKey}`);
+          if (barEl) barEl.style.width = `${pct}%`;
+          if (valEl) valEl.textContent = `${pct} %`;
+        });
+
+        updateRadarPolygon(values);
+      }
+
+      function fallbackCustomSport(rawName) {
+        const seed = rawName.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+        const a = 15 + (seed % 16);
+        const b = 15 + ((seed * 3) % 16);
+        const c = 15 + ((seed * 5) % 16);
+        const d = 15 + ((seed * 7) % 16);
+        const e = Math.max(10, 100 - (a + b + c + d));
+        const diff = 100 - (a + b + c + d + e);
+        return {
+          values: { silovy: a + diff, vytrvalostni: b, vybusny: c, agility: d, koordinacni: e },
+          note: `${rawName}: vyvážený poměr kondičních, rychlostně-silových a koordinačních faktorů výkonu.`
+        };
+      }
+
+      async function analyzeCustomSport(rawName) {
+        customBtn.disabled = true;
+        customBtn.textContent = 'Analyzuji...';
+
+        try {
+          const schema = {
+            type: "OBJECT",
+            properties: {
+              silovy: { type: "INTEGER" },
+              vytrvalostni: { type: "INTEGER" },
+              vybusny: { type: "INTEGER" },
+              agility: { type: "INTEGER" },
+              koordinacni: { type: "INTEGER" },
+              vysvetleni: { type: "STRING" }
+            },
+            required: ["silovy", "vytrvalostni", "vybusny", "agility", "koordinacni", "vysvetleni"]
+          };
+
+          const prompt = `Urči procentuální zastoupení 5 pohybových schopností pro sport: "${rawName}".
+Součet všech 5 čísel MUSÍ být přesně 100. V poli "vysvetleni" napiš 1–2 věty česky o limitujících a optimalizačních faktorech tohoto sportu.`;
+
+          const { text } = await ActiveKnowledgeEngine.queryGemini({
+            prompt,
+            systemInstruction: "Jsi odborník na strukturu sportovního výkonu. Odpovídej přesně ve formátu JSON.",
+            useSearch: false,
+            jsonSchema: schema
+          });
+
+          const parsed = JSON.parse(text);
+          const keys = ['silovy', 'vytrvalostni', 'vybusny', 'agility', 'koordinacni'];
+          let sum = keys.reduce((acc, k) => acc + (Number(parsed[k]) || 0), 0);
+          if (sum !== 100 && sum > 0) {
+            parsed.silovy += (100 - sum);
+          }
+
+          applyProfile(rawName, {
+            silovy: parsed.silovy,
+            vytrvalostni: parsed.vytrvalostni,
+            vybusny: parsed.vybusny,
+            agility: parsed.agility,
+            koordinacni: parsed.koordinacni
+          }, parsed.vysvetleni, true, null);
+
+          ActiveKnowledgeEngine.addInsight({
+            pillar: 'obecne',
+            pillarLabel: 'Profilace sportu',
+            title: `Struktura výkonu: ${rawName}`,
+            summary: parsed.vysvetleni,
+            sourceTitle: 'Analýza sportu (Okno 2)',
+            sourceUrl: ''
+          });
+
+          Toast.show(`Sport „${rawName}“ byl analyzován a uložen.`);
+        } catch (err) {
+          const fb = fallbackCustomSport(rawName);
+          applyProfile(rawName, fb.values, fb.note, true, null);
+        } finally {
+          customBtn.disabled = false;
+          customBtn.textContent = 'Analyzovat';
+        }
+      }
+
+      function init() {
+        presetButtons.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const key = btn.dataset.sportPreset;
+            const preset = sportPresets[key];
+            if (preset) applyProfile(preset.name, preset.values, preset.note, false, key);
+          });
+        });
+
+        selectEl.addEventListener('change', (e) => {
+          const key = e.target.value;
+          const preset = sportPresets[key];
+          if (preset) applyProfile(preset.name, preset.values, preset.note, false, key);
+        });
+
+        customForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const trimmed = customInput.value.trim();
+          if (!trimmed) return;
+          customInput.value = '';
+          analyzeCustomSport(trimmed);
+        });
+
+        applyProfile(sportPresets.tenis.name, sportPresets.tenis.values, sportPresets.tenis.note, false, 'tenis');
+      }
+
+      return { init };
+    })();
+
+
+    /**
+     * ==========================================================================
+     * MODUL 3: Window3Nutrition (PLNĚ FUNKČNÍ JÍDELNÍČEK S LIDSKÝM VYSVĚTLENÍM)
+     * Spočítá kalorie a makroživiny z věku, hmotnosti, sportu, denního vytížení
+     * a cíle, vygeneruje 5 konkrétních denních chodů respektujících všechna
+     * omezení (bez lepku, bez laktózy, vegetarián, vegan) a srozumitelně vysvětlí proč.
+     * ==========================================================================
+     */
+    const Window3Nutrition = (() => {
+      const state = {
+        age: 28,
+        weight: 75,
+        sport: 'Tenis',
+        workload: 'Střední',
+        goal: 'Udržení',
+        restrictions: new Set(),
+        mealVariantOffset: 0,
+        customMeals: null
+      };
+
+      // Databáze reálných, chutných a srozumitelných českých jídel pro 5 chodů
+      // Každé jídlo má varianty pro klasickou stravu, bez laktózy, bez lepku, vegetarián a vegan
+      const mealDatabase = {
+        snidane: [
+          {
+            base: 'Ovesná kaše s banánem, vlašskými ořechy a skyrem',
+            detail: '70 g ovesných vloček, 150 g bílého skyru/jogurtu, 1 banán, 15 g ořechů, skořice',
+            gf: '70 g bezlepkových ovesných vloček, 150 g bílého skyru, 1 banán, 15 g ořechů',
+            lf: '70 g ovesných vloček vařených ve vodě, 150 g bezlaktózového jogurtu, 1 banán, 15 g ořechů',
+            veg: '70 g ovesných vloček, 150 g řeckého jogurtu, 1 banán, 15 g vlašských ořechů',
+            vegan: '70 g ovesných vloček v sójovém nápoji, 150 g sójového jogurtu, 1 banán, 15 g vlašských ořechů',
+            tip: 'Ideální start dne – pomalé sacharidy z vloček uvolňují energii postupně celé dopoledne.'
+          },
+          {
+            base: 'Míchaná vejce (3 ks) s žitným chlebem, avokádem a rajčaty',
+            detail: '3 vejce na lžičce másla, 2 krajíce (90 g) žitného chleba, 1/3 avokáda, hrst cherry rajčat',
+            gf: '3 vejce na ghí, 2 krajíce (90 g) kvalitního bezlepkového chleba, 1/3 avokáda, rajčata',
+            lf: '3 vejce na olivovém oleji, 2 krajíce (90 g) žitného chleba, 1/3 avokáda, cherry rajčata',
+            veg: '3 míchaná vejce, 2 krajíce (90 g) žitného chleba, 1/3 avokáda, čerstvá zelenina',
+            vegan: '150 g míchaného tofu s kurkumou a černou solí, 2 krajíce žitného chleba, 1/2 avokáda, rajčata',
+            tip: 'Vejce/tofu dodají kvalitní bílkoviny a zasytí na dlouhou dobu bez výkyvů cukru v krvi.'
+          },
+          {
+            base: 'Tvarohový krém s lesním ovocem, medem a křupavou granolou',
+            detail: '200 g polotučného tvarohu, 50 g sypaného müsli bez cukru, 100 g borůvek/malin, lžička medu',
+            gf: '200 g tvarohu, 50 g pohankové bezlepkové granoly, 100 g lesního ovoce, lžička medu',
+            lf: '200 g bezlaktózového tvarohu, 50 g ovesného müsli, 100 g lesního ovoce, lžička medu',
+            veg: '200 g tvarohu, 50 g celozrnného müsli, 100 g lesního ovoce, lžička medu',
+            vegan: '200 g sójového tvarohu (Skyr style), 50 g ovesného müsli, 100 g lesního ovoce, lžička javorového sirupu',
+            tip: 'Rychlá snídaně hotová do 3 minut, bohatá na vápník a antioxidanty.'
+          }
+        ],
+        svacina1: [
+          {
+            base: 'Jablko, hrst mandlí a kefírové mléko',
+            detail: '1 větší jablko (160 g), 20 g nepražených mandlí, 250 ml bílého kefíru',
+            gf: '1 větší jablko (160 g), 20 g mandlí, 250 ml bílého kefíru (přirozeně bez lepku)',
+            lf: '1 větší jablko (160 g), 20 g mandlí, 250 ml bezlaktózového kefíru nebo kefírové vody',
+            veg: '1 větší jablko (160 g), 20 g mandlí, 250 ml kefírového mléka',
+            vegan: '1 větší jablko (160 g), 25 g mandlí, 250 ml neslazeného sójového nápoje s vápníkem',
+            tip: 'Lehká svačina, která nezatíží žaludek před poledním pohybem.'
+          },
+          {
+            base: 'Celozrnný toast se šunkou od kosti, sýrem a okurkou',
+            detail: '2 plátky (70 g) celozrnného toastu, 60 g kvalitní krůtí šunky, 30 g eidamu, 1/3 salátové okurky',
+            gf: '2 plátky (70 g) bezlepkového toastu, 60 g krůtí šunky, 30 g tvrdého sýra, salátová okurka',
+            lf: '2 plátky celozrnného chleba, 70 g krůtí šunky, 1 lžíce hummusu místo sýra, okurka',
+            veg: '2 plátky celozrnného chleba, 50 g tvrdého sýra (30 %) nebo 2 vařená vejce, salátová okurka',
+            vegan: '2 plátky celozrnného chleba, 60 g cizrnového hummusu, plátky uzeného tempehu, okurka',
+            tip: 'Praktická svačina do krabičky do práce nebo do školy.'
+          }
+        ],
+        obed: [
+          {
+            base: 'Kuřecí prsa na bylinkách s jasmínovou rýží a dušenou zeleninou',
+            detail: '160 g kuřecích prsou na olivovém oleji, 80 g rýže (váha v syrovém stavu), 150 g brokolice a mrkve',
+            gf: '160 g kuřecích prsou, 80 g jasmínové rýže, 150 g dušené zeleniny (přirozeně bez lepku)',
+            lf: '160 g kuřecích prsou na olivovém oleji, 80 g jasmínové rýže, 150 g zeleniny (bez mléka)',
+            veg: '150 g grilovaného sýra halloumi nebo 3 vejce, 80 g rýže, 150 g dušené zeleniny',
+            vegan: '160 g marinovaného tempehu nebo tofu na pánvi, 85 g jasmínové rýže, 150 g zeleniny a lžička sezamového oleje',
+            tip: 'Hlavní zdroj energie pro odpolední trénink – rýže se snadno tráví a doplní svalový glykogen.'
+          },
+          {
+            base: 'Pečený losos s vařenými bramborami a listovým salátem',
+            detail: '150 g filetu z lososa s citronem, 250 g vařených brambor s petrželkou, velká miska zeleného salátu',
+            gf: '150 g pečeného lososa, 250 g vařených brambor, listový salát (přirozeně bez lepku)',
+            lf: '150 g pečeného lososa, 250 g vařených brambor s olivovým olejem, listový salát',
+            veg: '150 g pečeného lososa (pokud jíte ryby) nebo 160 g pečeného hermelínu/fety, 250 g brambor, salát',
+            vegan: '180 g cizrnového karí s kokosovým mlékem a špenátem, 80 g basmati rýže',
+            tip: 'Losos obsahuje omega-3 mastné kyseliny, které tlumí záněty po náročném sportu.'
+          },
+          {
+            base: 'Hovězí nudličky / krůtí ragú s celozrnnými těstovinami a rajčaty',
+            detail: '150 g libového krůtího nebo hovězího masa, 80 g celozrnných těstovin, 120 g drcených rajčat, bazalka',
+            gf: '150 g libového masa, 80 g kukuřičných nebo čočkových těstovin, 120 g rajčatového suga',
+            lf: '150 g libového masa, 80 g celozrnných těstovin, 120 g rajčatového suga s olivovým olejem',
+            veg: '80 g celozrnných těstovin s 100 g ricotty/mozzarelly, rajčatovým sugem a bazalkou',
+            vegan: '80 g čočkových těstovin (vysoký obsah bílkovin) s rajčatovou omáčkou, olivami a lahůdkovým droždím',
+            tip: 'Skvělé jídlo ve dnech s vyšším nebo dvoufázovým tréninkovým zatížením.'
+          }
+        ],
+        svacina2: [
+          {
+            base: 'Banán a proteinový / tvarohový nápoj (ideálně po tréninku)',
+            detail: '1 zralý banán, 30 g syrovátkového proteinu ve vodě (nebo 250 ml kefíru + lžička kakaa)',
+            gf: '1 zralý banán, 30 g syrovátkového proteinu (bez lepku)',
+            lf: '1 zralý banán, 30 g bezlaktózového nebo hovězího/hrachového proteinu ve vodě',
+            veg: '1 zralý banán, 30 g syrovátkového proteinu (nebo 200 ml řeckého jogurtu)',
+            vegan: '1 zralý banán, 35 g hrachovo-rýžového proteinu v ovesném nebo sójovém nápoji',
+            tip: 'Rychlá regenerace po sportu: banán doplní vyčerpaný cukr ve svalech a bílkoviny opraví svalová vlákna.'
+          },
+          {
+            base: 'Rýžové chlebíčky s cottage sýrem a ředkvičkami',
+            detail: '3–4 rýžové/kukuřičné chlebíčky (40 g), 150 g sýru cottage, svazek ředkviček, pažitka',
+            gf: '3–4 rýžové chlebíčky (40 g), 150 g sýru cottage, ředkvičky (přirozeně bez lepku)',
+            lf: '3–4 rýžové chlebíčky (40 g), 150 g bezlaktózového cottage sýru, ředkvičky',
+            veg: '3–4 rýžové chlebíčky (40 g), 150 g sýru cottage, ředkvičky',
+            vegan: '3–4 rýžové chlebíčky (40 g), 100 g avokádovo-luštěninové pomazánky, ředkvičky',
+            tip: 'Lehce stravitelné odpolední jídlo, které dodá bílkoviny bez pocitu těžkosti.'
+          }
+        ],
+        vecere: [
+          {
+            base: 'Pečená treska / krůtí plátek se sladkými batáty a špenátem',
+            detail: '160 g tresky nebo krůtího masa, 200 g pečených batátů, 100 g listového špenátu na česneku',
+            gf: '160 g krůtího masa / tresky, 200 g pečených batátů, 100 g listového špenátu (bez lepku)',
+            lf: '160 g krůtího masa / tresky na olivovém oleji, 200 g batátů, 100 g špenátu',
+            veg: '2 zastřená/vařená vejce, 200 g pečených batátů, 100 g špenátu a 40 g sýru feta',
+            vegan: '150 g pečeného uzeného tofu, 200 g batátů, 100 g dušeného špenátu a dýňová semínka',
+            tip: 'Večeře bohatá na draslík, hořčík a bílkoviny podpoří klidný spánek a noční regeneraci.'
+          },
+          {
+            base: 'Kváskový chléb s tvarohovou pomazánkou, vejcem a čerstvou zeleninou',
+            detail: '2 krajíce (90 g) kváskového chleba, 120 g tvarohové pomazánky s pažitkou, 1 vařené vejce, paprika',
+            gf: '2 krajíce (90 g) bezlepkového chleba, 120 g tvarohové pomazánky, 1 vařené vejce, paprika',
+            lf: '2 krajíce (90 g) kváskového chleba, 100 g tuňákové/vajíčkové pomazánky bez mléka, paprika',
+            veg: '2 krajíce (90 g) kváskového chleba, 120 g tvarohové pomazánky, 1 vařené vejce, paprika',
+            vegan: '2 krajíce (90 g) kváskového chleba, 100 g pomazánky z červené čočky, 80 g tofu, paprika',
+            tip: 'Tradiční studená večeře, která má díky tvarohu/luštěninám pomalu vstřebatelné bílkoviny na noc.'
+          }
+        ]
+      };
+
+      const formEl = document.getElementById('w3-nutrition-form');
+      const ageSlider = document.getElementById('w3-age-slider');
+      const ageDisplay = document.getElementById('w3-age-display');
+      const weightSlider = document.getElementById('w3-weight-slider');
+      const weightDisplay = document.getElementById('w3-weight-display');
+      const sportInput = document.getElementById('w3-sport-input');
+      const workloadBtns = document.querySelectorAll('.w3-workload-btn');
+      const goalBtns = document.querySelectorAll('.w3-goal-btn');
+      const chipBtns = document.querySelectorAll('.w3-chip-btn');
+      const customNoteInput = document.getElementById('w3-custom-note');
+
+      const statusBadge = document.getElementById('w3-status-badge');
+      const summaryTitle = document.getElementById('w3-summary-title');
+      const plainExplanation = document.getElementById('w3-plain-explanation');
+      const restrictionTag = document.getElementById('w3-restriction-tag');
+      const mealsListEl = document.getElementById('w3-meals-list');
+      const shuffleBtn = document.getElementById('w3-shuffle-btn');
+      const aiMenuBtn = document.getElementById('w3-ai-menu-btn');
+
+      const kpiKcal = document.getElementById('w3-kpi-kcal');
+      const kpiProtein = document.getElementById('w3-kpi-protein');
+      const kpiProteinSub = document.getElementById('w3-kpi-protein-sub');
+      const kpiCarbs = document.getElementById('w3-kpi-carbs');
+      const kpiCarbsSub = document.getElementById('w3-kpi-carbs-sub');
+      const kpiFats = document.getElementById('w3-kpi-fats');
+      const kpiFatsSub = document.getElementById('w3-kpi-fats-sub');
+
+      function updateSlidersVisual() {
+        const ageMin = Number(ageSlider.min);
+        const ageMax = Number(ageSlider.max);
+        state.age = Number(ageSlider.value);
+        ageSlider.style.setProperty('--slider-progress', `${((state.age - ageMin) / (ageMax - ageMin)) * 100}%`);
+        ageDisplay.textContent = `${state.age} let`;
+
+        const wMin = Number(weightSlider.min);
+        const wMax = Number(weightSlider.max);
+        state.weight = Number(weightSlider.value);
+        weightSlider.style.setProperty('--slider-progress', `${((state.weight - wMin) / (wMax - wMin)) * 100}%`);
+        weightDisplay.textContent = `${state.weight} kg`;
+      }
+
+      // Výpočet reálných kalorií a makroživin podle věku, hmotnosti, vytížení a cíle
+      function calculateNutritionTargets() {
+        const w = state.weight;
+        const age = state.age;
+
+        // Základní klidový výdej (orientační vzorec dle váhy a věku)
+        const bmr = Math.round((w * 22.5) - (age * 3.2) + 180);
+
+        // Koeficient denního vytížení
+        const workloadMultipliers = {
+          'Nízké': 1.35,
+          'Střední': 1.55,
+          'Vysoké': 1.78,
+          'Dvoufázové': 2.02
+        };
+        const tdee = Math.round(bmr * (workloadMultipliers[state.workload] || 1.55));
+
+        // Úprava podle cíle
+        let targetKcal = tdee;
+        let proteinPerKg = 1.7;
+        let fatPerKg = 1.0;
+
+        if (state.goal === 'Redukce') {
+          targetKcal = Math.max(1450, Math.round(tdee * 0.82));
+          proteinPerKg = 2.0; // Vyšší bílkoviny chrání svaly při hubnutí
+          fatPerKg = 0.85;
+        } else if (state.goal === 'Udržení') {
+          targetKcal = tdee;
+          proteinPerKg = state.workload === 'Dvoufázové' || state.workload === 'Vysoké' ? 1.85 : 1.65;
+          fatPerKg = 1.0;
+        } else {
+          // Výkon / Nárůst
+          targetKcal = Math.round(tdee * 1.12);
+          proteinPerKg = 1.95;
+          fatPerKg = 1.05;
+        }
+
+        const proteinG = Math.round(w * proteinPerKg);
+        const fatsG = Math.round(w * fatPerKg);
+        const kcalFromProteinAndFat = (proteinG * 4) + (fatsG * 9);
+        const carbsG = Math.max(90, Math.round((targetKcal - kcalFromProteinAndFat) / 4));
+
+        return {
+          kcal: targetKcal,
+          protein: proteinG,
+          proteinPerKg: proteinPerKg.toFixed(1).replace('.', ','),
+          carbs: carbsG,
+          carbsPerKg: (carbsG / w).toFixed(1).replace('.', ','),
+          fats: fatsG,
+          fatsPerKg: fatPerKg.toFixed(1).replace('.', ',')
+        };
+      }
+
+      function pickMealVariantText(mealObj) {
+        if (state.restrictions.has('Vegan')) return mealObj.vegan;
+        if (state.restrictions.has('Vegetarián')) return mealObj.veg;
+        if (state.restrictions.has('Bez lepku')) return mealObj.gf;
+        if (state.restrictions.has('Bez laktózy')) return mealObj.lf;
+        return mealObj.detail;
+      }
+
+      function buildPlainExplanation(targets, sportName) {
+        const workloadText = {
+          'Nízké': 'při pohodovém dni bez velkého výdeje nepotřebujete přebytek cukrů – hlavní roli hrají bílkoviny a zelenina, abyste neměli hlad.',
+          'Střední': `pro ${sportName} a aktivní den máte vyvážený poměr sacharidů jako paliva pro svaly a bílkovin pro regeneraci.`,
+          'Vysoké': `náročný den a ${sportName} vyžadují vyšší přísun kvalitních příloh (rýže, brambory, vločky), abyste nebyli unavení.`,
+          'Dvoufázové': `protože trénujete dvakrát denně, tělo potřebuje extra sacharidy mezi prvním a druhým tréninkem, aby stihlo doplnit energii ve svalech.`
+        }[state.workload];
+
+        const goalText = {
+          'Redukce': 'Kalorie jsou nastavené v mírném, bezpečném deficitu (cca −18 %), takže budete hubnout tuk, ale zůstane vám síla na pohyb.',
+          'Udržení': 'Energie přesně pokrývá váš denní výdej – váha zůstane stabilní a tělo bude skvěle regenerovat.',
+          'Výkon / Nárůst': 'Energie je mírně navýšená (+12 %), aby tělo mělo stavební materiál pro růst svalů a vyšší sportovní výkon.'
+        }[state.goal];
+
+        return `${goalText} Zároveň ${workloadText}`;
+      }
+
+      function generateAndRenderMeals() {
+        const sportName = sportInput.value.trim() || 'všeobecný pohyb';
+        state.sport = sportName;
+        const note = customNoteInput.value.trim();
+
+        const targets = calculateNutritionTargets();
+
+        // Aktualizace KPI karet
+        kpiKcal.textContent = `${targets.kcal.toLocaleString('cs-CZ')} kcal`;
+        kpiProtein.textContent = `${targets.protein} g`;
+        kpiProteinSub.textContent = `${targets.proteinPerKg} g / kg • Svaly a obnova`;
+        kpiCarbs.textContent = `${targets.carbs} g`;
+        kpiCarbsSub.textContent = `${targets.carbsPerKg} g / kg • Energie na pohyb`;
+        kpiFats.textContent = `${targets.fats} g`;
+        kpiFatsSub.textContent = `${targets.fatsPerKg} g / kg • Hormony a zdraví`;
+
+        // Souhrn a lidské vysvětlení
+        const goalLabelMap = {
+          'Redukce': 'Zdravě zhubnout',
+          'Udržení': 'Udržet váhu & energii',
+          'Výkon / Nárůst': 'Nabrat svaly & výkon'
+        };
+        summaryTitle.textContent = `Jídelníček pro: ${state.age} let, ${state.weight} kg • ${sportName} (${goalLabelMap[state.goal]})`;
+        plainExplanation.textContent = buildPlainExplanation(targets, sportName);
+
+        const activeRestr = Array.from(state.restrictions);
+        if (note) activeRestr.push(`Poznámka: ${note}`);
+        restrictionTag.textContent = activeRestr.length ? activeRestr.join(' • ') : 'Klasická pestrá strava';
+
+        statusBadge.textContent = `Aktualizováno (${targets.kcal.toLocaleString('cs-CZ')} kcal)`;
+
+        // Rozdělení kalorií a maker do 5 chodů (25 % / 10 % / 32 % / 11 % / 22 %)
+        const mealShares = [
+          { key: 'snidane', num: '01', name: 'Snídaně', time: '07:00 – 08:30', share: 0.25 },
+          { key: 'svacina1', num: '02', name: 'Dopolední svačina', time: '10:00 – 11:00', share: 0.10 },
+          { key: 'obed', num: '03', name: 'Oběd', time: '12:30 – 14:00', share: 0.32 },
+          { key: 'svacina2', num: '04', name: 'Odpolední svačina (kolem tréninku)', time: '16:00 – 17:30', share: 0.11 },
+          { key: 'vecere', num: '05', name: 'Večeře', time: '19:00 – 20:30', share: 0.22 },
+        ];
+
+        // Scale factor gramáže podle kalorického cíle vůči referenčním 2500 kcal
+        const portionScale = Math.max(0.65, Math.min(1.55, targets.kcal / 2500));
+
+        mealsListEl.innerHTML = mealShares.map((slot, idx) => {
+          const mKcal = Math.round(targets.kcal * slot.share);
+          const mProt = Math.round(targets.protein * slot.share);
+          const mCarb = Math.round(targets.carbs * slot.share);
+          const mFat = Math.round(targets.fats * slot.share);
+
+          // Pokud uživatel vygeneroval vlastní AI jídelníček, použijeme jej
+          if (state.customMeals && state.customMeals[idx]) {
+            const cm = state.customMeals[idx];
+            return `
+              <div class="info-box p-3.5 sm:p-4 pillar-workspace-animate">
+                <div class="flex flex-wrap items-start justify-between gap-2">
+                  <div class="flex items-start gap-3">
+                    <span class="w-7 h-7 rounded-lg bg-accent-tint border border-accent-border flex items-center justify-center text-xs font-bold text-accent shrink-0 mt-0.5">${slot.num}</span>
+                    <div>
+                      <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs sm:text-sm font-semibold text-slate-900">${slot.name}</span>
+                        <span class="text-[11px] text-slate-400">${slot.time}</span>
+                      </div>
+                      <div class="text-xs font-medium text-slate-800 mt-1">${cm.title}</div>
+                      <p class="text-[11px] text-slate-600 mt-0.5 leading-relaxed">${cm.ingredients}</p>
+                      <p class="text-[11px] text-accent mt-1">💡 ${cm.tip}</p>
+                    </div>
+                  </div>
+                  <div class="text-right shrink-0 ml-auto">
+                    <span class="inline-block text-xs font-bold text-slate-900 bg-white px-2.5 py-1 rounded-lg border border-slate-200 tabular-nums">${mKcal} kcal</span>
+                    <div class="text-[10px] text-slate-500 mt-1 tabular-nums">B: ${mProt} g • S: ${mCarb} g • T: ${mFat} g</div>
+                  </div>
+                </div>
+              </div>
+            `;
+          }
+
+          const options = mealDatabase[slot.key];
+          const chosen = options[(idx + state.mealVariantOffset) % options.length];
+          let recipeText = pickMealVariantText(chosen);
+
+          // Přepočet gramáží v textu pro vysoký nebo nízký příjem, aby porce seděly ke kaloriím
+          if (Math.abs(portionScale - 1) > 0.12) {
+            recipeText = recipeText.replace(/(\d+)\s*g\b/g, (_, grams) => {
+              const adjusted = Math.round((Number(grams) * portionScale) / 5) * 5;
+              return `${Math.max(10, adjusted)} g`;
+            });
+          }
+
+          const displayTitle = (state.restrictions.has('Vegan') || state.restrictions.has('Vegetarián') || state.restrictions.has('Bez lepku') || state.restrictions.has('Bez laktózy'))
+            ? recipeText.split(',')[0]
+            : chosen.base;
+
+          return `
+            <div class="info-box p-3.5 sm:p-4 pillar-workspace-animate">
+              <div class="flex flex-wrap items-start justify-between gap-2">
+                <div class="flex items-start gap-3">
+                  <span class="w-7 h-7 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-xs font-bold text-accent shrink-0 mt-0.5">${slot.num}</span>
+                  <div>
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span class="text-xs sm:text-sm font-semibold text-slate-900">${slot.name}</span>
+                      <span class="text-[11px] text-slate-400">${slot.time}</span>
+                    </div>
+                    <div class="text-xs font-medium text-slate-800 mt-1">${displayTitle}</div>
+                    <p class="text-[11px] text-slate-600 mt-0.5 leading-relaxed">${recipeText}</p>
+                    <p class="text-[11px] text-slate-500 mt-1">💡 ${chosen.tip}</p>
+                  </div>
+                </div>
+                <div class="text-right shrink-0 ml-auto">
+                  <span class="inline-block text-xs font-bold text-slate-900 bg-white px-2.5 py-1 rounded-lg border border-slate-200 tabular-nums">${mKcal} kcal</span>
+                  <div class="text-[10px] text-slate-500 mt-1 tabular-nums">B: ${mProt} g • S: ${mCarb} g • T: ${mFat} g</div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Uložíme uživatelský profil do aktivní paměti aplikace
+        ActiveKnowledgeEngine.saveUserProfile({
+          age: state.age,
+          weight: state.weight,
+          sport: state.sport,
+          workload: state.workload,
+          goal: state.goal,
+          restrictions: Array.from(state.restrictions),
+          note
+        });
+      }
+
+      async function generateAiCustomMenu() {
+        const targets = calculateNutritionTargets();
+        const sportName = sportInput.value.trim() || 'všeobecný sport';
+        const restrList = Array.from(state.restrictions).join(', ') || 'žádná omezení';
+        const note = customNoteInput.value.trim() || 'žádné speciální poznámky';
+
+        aiMenuBtn.disabled = true;
+        aiMenuBtn.textContent = '✨ Připravuji...';
+
+        try {
+          const schema = {
+            type: "ARRAY",
+            items: {
+              type: "OBJECT",
+              properties: {
+                title: { type: "STRING" },
+                ingredients: { type: "STRING" },
+                tip: { type: "STRING" }
+              },
+              required: ["title", "ingredients", "tip"]
+            }
+          };
+
+          const prompt = `Sestav český 5-chodový denní jídelníček (1. Snídaně, 2. Dopolední svačina, 3. Oběd, 4. Odpolední svačina, 5. Večeře) pro sportovce:
+- Věk: ${state.age} let, Váha: ${state.weight} kg, Sport: ${sportName}
+- Denní vytížení: ${state.workload}, Cíl: ${state.goal} (${targets.kcal} kcal, ${targets.protein} g bílkovin)
+- Stravovací omezení: ${restrList}
+- Vlastní poznámka uživatele: ${note}
+Každá z 5 položek musí obsahovat český název jídla ("title"), přesné gramáže surovin ("ingredients") a krátký srozumitelný tip pro laika ("tip").`;
+
+          const { text } = await ActiveKnowledgeEngine.queryGemini({
+            prompt,
+            systemInstruction: "Jsi sportovní nutriční specialista. Píšeš srozumitelné, chutné a realistické české jídelníčky z běžně dostupných surovin.",
+            useSearch: false,
+            jsonSchema: schema
+          });
+
+          const meals = JSON.parse(text);
+          if (Array.isArray(meals) && meals.length >= 5) {
+            state.customMeals = meals.slice(0, 5);
+            generateAndRenderMeals();
+            Toast.show('AI sestavila originální jídelníček podle vašich poznámek!');
+          }
+        } catch (err) {
+          state.customMeals = null;
+          state.mealVariantOffset += 1;
+          generateAndRenderMeals();
+          Toast.show('Jídelníček byl aktualizován novou kombinací jídel.');
+        } finally {
+          aiMenuBtn.disabled = false;
+          aiMenuBtn.textContent = '✨ AI varianta';
+        }
+      }
+
+      // Veřejná metoda pro úpravu jídelníčku z Poradního okna (Okno 4)
+      function applyExternalUpdate({ restrictionToAdd = null, workload = null, goal = null, sport = null }) {
+        if (restrictionToAdd) {
+          state.restrictions.add(restrictionToAdd);
+          chipBtns.forEach((chip) => {
+            const active = state.restrictions.has(chip.dataset.restriction);
+            chip.classList.toggle('border-accent', active);
+            chip.classList.toggle('bg-accent-tint', active);
+            chip.classList.toggle('text-accent', active);
+            chip.classList.toggle('border-slate-200', !active);
+            chip.classList.toggle('bg-white', !active);
+            chip.classList.toggle('text-slate-600', !active);
+          });
+        }
+        if (workload) {
+          state.workload = workload;
+          workloadBtns.forEach((b) => {
+            const active = b.dataset.workload === workload;
+            b.classList.toggle('border-accent', active);
+            b.classList.toggle('bg-accent-tint', active);
+            b.classList.toggle('text-accent', active);
+            b.classList.toggle('border-slate-200', !active);
+            b.classList.toggle('bg-white', !active);
+            b.classList.toggle('text-slate-700', !active);
+          });
+        }
+        if (goal) {
+          state.goal = goal;
+          goalBtns.forEach((b) => {
+            const active = b.dataset.goal === goal;
+            b.classList.toggle('border-accent', active);
+            b.classList.toggle('bg-accent-tint', active);
+            b.classList.toggle('text-accent', active);
+            b.classList.toggle('border-slate-200', !active);
+            b.classList.toggle('bg-white', !active);
+            b.classList.toggle('text-slate-700', !active);
+          });
+        }
+        if (sport) {
+          sportInput.value = sport;
+          state.sport = sport;
+        }
+        state.customMeals = null;
+        generateAndRenderMeals();
+      }
+
+      function init() {
+        updateSlidersVisual();
+        ageSlider.addEventListener('input', () => {
+          updateSlidersVisual();
+          generateAndRenderMeals();
+        });
+        weightSlider.addEventListener('input', () => {
+          updateSlidersVisual();
+          generateAndRenderMeals();
+        });
+
+        workloadBtns.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            state.workload = btn.dataset.workload;
+            state.customMeals = null;
+            workloadBtns.forEach((b) => {
+              const active = b === btn;
+              b.classList.toggle('border-accent', active);
+              b.classList.toggle('bg-accent-tint', active);
+              b.classList.toggle('text-accent', active);
+              b.classList.toggle('border-slate-200', !active);
+              b.classList.toggle('bg-white', !active);
+              b.classList.toggle('text-slate-700', !active);
+            });
+            generateAndRenderMeals();
+          });
+        });
+
+        goalBtns.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            state.goal = btn.dataset.goal;
+            state.customMeals = null;
+            goalBtns.forEach((b) => {
+              const active = b === btn;
+              b.classList.toggle('border-accent', active);
+              b.classList.toggle('bg-accent-tint', active);
+              b.classList.toggle('text-accent', active);
+              b.classList.toggle('border-slate-200', !active);
+              b.classList.toggle('bg-white', !active);
+              b.classList.toggle('text-slate-700', !active);
+            });
+            generateAndRenderMeals();
+          });
+        });
+
+        chipBtns.forEach((chip) => {
+          chip.addEventListener('click', () => {
+            const val = chip.dataset.restriction;
+            if (state.restrictions.has(val)) {
+              state.restrictions.delete(val);
+            } else {
+              state.restrictions.add(val);
+            }
+            state.customMeals = null;
+            const active = state.restrictions.has(val);
+            chip.classList.toggle('border-accent', active);
+            chip.classList.toggle('bg-accent-tint', active);
+            chip.classList.toggle('text-accent', active);
+            chip.classList.toggle('border-slate-200', !active);
+            chip.classList.toggle('bg-white', !active);
+            chip.classList.toggle('text-slate-600', !active);
+            generateAndRenderMeals();
+          });
+        });
+
+        formEl.addEventListener('submit', (e) => {
+          e.preventDefault();
+          state.customMeals = null;
+          generateAndRenderMeals();
+          Toast.show('Jídelníček byl přepočítán a aktualizován!');
+        });
+
+        shuffleBtn.addEventListener('click', () => {
+          state.customMeals = null;
+          state.mealVariantOffset += 1;
+          generateAndRenderMeals();
+          Toast.show('Recepty byly obměněny při zachování vašich kalorií.');
+        });
+
+        aiMenuBtn.addEventListener('click', generateAiCustomMenu);
+
+        // Ihned při načtení vygenerujeme plný, srozumitelný jídelníček (žádné prázdné sloty!)
+        generateAndRenderMeals();
+      }
+
+      return { init, applyExternalUpdate, getState: () => ({ ...state, restrictions: Array.from(state.restrictions) }) };
+    })();
+
+
+    /**
+     * ==========================================================================
+     * MODUL 4: Window4Advisor (PORADNÍ OKNO + AKTIVNÍ UČENÍ & ZNALOSTNÍ BÁZE)
+     * ==========================================================================
+     */
+    const Window4Advisor = (() => {
+      const state = {
+        isOpen: false,
+        isPinned: false,
+        activeTab: 'chat'
+      };
+
+      const triggerBtn = document.getElementById('nav-advisor-trigger');
+      const knowledgeTriggerBtn = document.getElementById('nav-knowledge-trigger');
+      const drawerEl = document.getElementById('window4-advisor-drawer');
+      const backdropEl = document.getElementById('advisor-backdrop');
+      const closeBtn = document.getElementById('advisor-close-btn');
+      const pinBtn = document.getElementById('advisor-pin-btn');
+      const pinLabel = document.getElementById('advisor-pin-label');
+      const layoutWrapper = document.getElementById('app-layout-wrapper');
+
+      const drawerTabBtns = document.querySelectorAll('.drawer-tab-btn');
+      const chatPanelEl = document.getElementById('drawer-panel-chat');
+      const knowledgePanelEl = document.getElementById('drawer-panel-knowledge');
+      const knowledgeListEl = document.getElementById('knowledge-items-list');
+      const scanAllBtn = document.getElementById('knowledge-scan-all-btn');
+      const scanBtnText = document.getElementById('knowledge-scan-btn-text');
+
+      const formEl = document.getElementById('advisor-form');
+      const inputEl = document.getElementById('advisor-input');
+      const submitBtn = document.getElementById('advisor-submit-btn');
+      const messagesEl = document.getElementById('advisor-messages');
+      const quickChips = document.querySelectorAll('.advisor-quick-chip');
+
+      function switchDrawerTab(tabName) {
+        state.activeTab = tabName;
+        drawerTabBtns.forEach((btn) => {
+          const active = btn.dataset.drawerTab === tabName;
+          btn.classList.toggle('bg-white', active);
+          btn.classList.toggle('text-slate-900', active);
+          btn.classList.toggle('shadow-sm', active);
+          btn.classList.toggle('text-slate-600', !active);
+        });
+
+        if (tabName === 'chat') {
+          chatPanelEl.classList.remove('hidden');
+          chatPanelEl.classList.add('flex');
+          knowledgePanelEl.classList.add('hidden');
+          knowledgePanelEl.classList.remove('flex');
+        } else {
+          knowledgePanelEl.classList.remove('hidden');
+          knowledgePanelEl.classList.add('flex');
+          chatPanelEl.classList.add('hidden');
+          chatPanelEl.classList.remove('flex');
+          renderKnowledgeBase();
+        }
+      }
+
+      function renderKnowledgeBase() {
+        const items = ActiveKnowledgeEngine.getAllInsights();
+        knowledgeListEl.innerHTML = items.map((item) => `
+          <div class="rounded-xl bg-white border border-slate-200 p-3 shadow-sm space-y-1">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-accent-tint text-accent">
+                ${item.pillarLabel}
+              </span>
+              <span class="text-[10px] text-slate-400">${item.timestamp}</span>
+            </div>
+            <div class="text-xs font-semibold text-slate-900 pt-0.5">${item.title}</div>
+            <p class="text-[11px] text-slate-600 leading-relaxed">${item.summary}</p>
+            <div class="text-[10px] text-slate-400 pt-1 border-t border-slate-100">
+              ${item.sourceUrl
+                ? `<a href="${item.sourceUrl}" target="_blank" rel="noopener noreferrer" class="text-accent hover:underline">Zdroj: ${item.sourceTitle} ↗</a>`
+                : `Zdroj: ${item.sourceTitle}`}
+            </div>
+          </div>
+        `).join('');
+      }
+
+      function syncDrawerUI() {
+        triggerBtn.setAttribute('aria-expanded', String(state.isOpen));
+        triggerBtn.classList.toggle('border-accent', state.isOpen);
+        triggerBtn.classList.toggle('bg-accent-tint', state.isOpen);
+        triggerBtn.classList.toggle('text-accent', state.isOpen);
+
+        if (state.isOpen) {
+          drawerEl.classList.remove('translate-x-full');
+          if (state.isPinned && window.innerWidth >= 1024) {
+            backdropEl.classList.add('hidden');
+            layoutWrapper.classList.add('lg:pr-[420px]');
+          } else {
+            backdropEl.classList.remove('hidden');
+            layoutWrapper.classList.remove('lg:pr-[420px]');
+          }
+        } else {
+          drawerEl.classList.add('translate-x-full');
+          backdropEl.classList.add('hidden');
+          layoutWrapper.classList.remove('lg:pr-[420px]');
+        }
+
+        pinBtn.classList.toggle('border-accent', state.isPinned);
+        pinBtn.classList.toggle('bg-accent-tint', state.isPinned);
+        pinBtn.classList.toggle('text-accent', state.isPinned);
+        pinLabel.textContent = state.isPinned ? 'Připnuto' : 'Připnout';
+      }
+
+      function openDrawer(tab = 'chat') {
+        state.isOpen = true;
+        switchDrawerTab(tab);
+        syncDrawerUI();
+        if (tab === 'chat') {
+          setTimeout(() => inputEl.focus(), 180);
+        }
+      }
+
+      function closeDrawer() {
+        state.isOpen = false;
+        state.isPinned = false;
+        syncDrawerUI();
+      }
+
+      function togglePin() {
+        state.isPinned = !state.isPinned;
+        syncDrawerUI();
+      }
+
+      function escapeHTML(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      function appendMessage(text, sender = 'user', sources = []) {
+        const now = new Date().toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+        const wrapper = document.createElement('div');
+
+        if (sender === 'user') {
+          wrapper.className = 'flex flex-col items-end ml-auto max-w-[90%] pillar-workspace-animate';
+          wrapper.innerHTML = `
+            <div class="rounded-2xl rounded-tr-sm bg-accent text-white px-3.5 py-2.5 text-xs sm:text-[13px] shadow-sm leading-relaxed">
+              ${escapeHTML(text)}
+            </div>
+            <span class="text-[10px] text-slate-400 mt-1 mr-1">Vy • ${now}</span>
+          `;
+        } else {
+          const sourcesHTML = sources.length > 0
+            ? `<div class="mt-2 pt-1.5 border-t border-slate-100 space-y-1">
+                <div class="text-[10px] font-semibold text-slate-400">Ověřené zdroje z webu:</div>
+                ${sources.slice(0, 2).map((s) => `<a href="${escapeHTML(s.uri)}" target="_blank" rel="noopener noreferrer" class="block text-[10px] text-accent hover:underline truncate">${escapeHTML(s.title)} ↗</a>`).join('')}
+               </div>`
+            : '';
+
+          wrapper.className = 'flex flex-col items-start max-w-[92%] pillar-workspace-animate';
+          wrapper.innerHTML = `
+            <div class="rounded-2xl rounded-tl-sm bg-white border border-slate-200 px-3.5 py-2.5 text-xs sm:text-[13px] text-slate-700 shadow-sm leading-relaxed">
+              <div>${escapeHTML(text).replace(/\n/g, '<br>')}</div>
+              ${sourcesHTML}
+            </div>
+            <span class="text-[10px] text-slate-400 mt-1 ml-1">AI Poradce • ${now}</span>
+          `;
+        }
+
+        messagesEl.appendChild(wrapper);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }
+
+      // Detekce přímých povelů pro úpravu UI (jídelníček / pilíře)
+      function checkAndApplyDirectActions(queryLower) {
+        let actionFeedback = [];
+
+        if (queryLower.includes('bezlepk') || queryLower.includes('bez lepku')) {
+          Window3Nutrition.applyExternalUpdate({ restrictionToAdd: 'Bez lepku' });
+          AppNavigation.switchView('nutrition');
+          actionFeedback.push('Aktivoval jsem bezlepkový režim v jídelníčku.');
+        }
+        if (queryLower.includes('bezlakt') || queryLower.includes('bez laktózy') || queryLower.includes('bez mléka')) {
+          Window3Nutrition.applyExternalUpdate({ restrictionToAdd: 'Bez laktózy' });
+          AppNavigation.switchView('nutrition');
+          actionFeedback.push('Aktivoval jsem režim bez laktózy v jídelníčku.');
+        }
+        if (queryLower.includes('vegan')) {
+          Window3Nutrition.applyExternalUpdate({ restrictionToAdd: 'Vegan' });
+          AppNavigation.switchView('nutrition');
+          actionFeedback.push('Přepnul jsem jídelníček na čistě rostlinnou (vegan) stravu.');
+        } else if (queryLower.includes('vegetari')) {
+          Window3Nutrition.applyExternalUpdate({ restrictionToAdd: 'Vegetarián' });
+          AppNavigation.switchView('nutrition');
+          actionFeedback.push('Přepnul jsem jídelníček na vegetariánský.');
+        }
+        if (queryLower.includes('zhubn') || queryLower.includes('redukc')) {
+          Window3Nutrition.applyExternalUpdate({ goal: 'Redukce' });
+          AppNavigation.switchView('nutrition');
+          actionFeedback.push('Nastavil jsem cíl jídelníčku na zdravé hubnutí.');
+        }
+        if (queryLower.includes('dvoufáz')) {
+          Window3Nutrition.applyExternalUpdate({ workload: 'Dvoufázové' });
+          AppNavigation.switchView('nutrition');
+          actionFeedback.push('Nastavil jsem dvoufázové vytížení dne a navýšil energii.');
+        }
+
+        return actionFeedback;
+      }
+
+      async function handleUserQuery(rawText) {
+        const text = rawText.trim();
+        if (!text) return;
+
+        appendMessage(text, 'user');
+        inputEl.value = '';
+        submitBtn.disabled = true;
+        submitBtn.textContent = '...';
+
+        // Okamžitá aplikace přímých úprav v rozhraní
+        const directActions = checkAndApplyDirectActions(text.toLowerCase());
+
+        const activePillar = Window1Pillars.getActivePillar();
+        const nutritionState = Window3Nutrition.getState();
+
+        try {
+          const prompt = `Dotaz uživatele: "${text}"
+Aktuální kontext v aplikaci:
+- Aktivní tréninkový pilíř: ${activePillar}
+- Nastavení jídelníčku: věk ${nutritionState.age} let, váha ${nutritionState.weight} kg, sport ${nutritionState.sport}, vytížení ${nutritionState.workload}, cíl ${nutritionState.goal}, omezení: ${nutritionState.restrictions.join(', ') || 'žádná'}.
+${directActions.length ? `V aplikaci už bylo automaticky provedeno: ${directActions.join(' ')}` : ''}
+
+Odpověz česky, přátelsky, srozumitelně i pro začátečníka, ale odborně přesně (vycházej z principů sportovního tréninku a aktuálních poznatků z webu). Maximálně 4–6 vět.`;
+
+          const { text: aiReply, sources } = await ActiveKnowledgeEngine.queryGemini({
+            prompt,
+            systemInstruction: "Jsi chytrý sportovní a výživový poradce v aplikaci Performance Lab. Vysvětluješ věci lidsky, přehledně a ukládáš nové poznatky.",
+            useSearch: true
+          });
+
+          const finalReply = directActions.length > 0
+            ? `✅ ${directActions.join(' ')}\n\n${aiReply.replace(/\*\*/g, '')}`
+            : aiReply.replace(/\*\*/g, '');
+
+          appendMessage(finalReply, 'system', sources);
+
+          // Aktivní učení: uložíme nový poznatek z konverzace
+          ActiveKnowledgeEngine.addInsight({
+            pillar: activePillar,
+            pillarLabel: `Dotaz (${activePillar})`,
+            title: text.length > 55 ? text.slice(0, 52) + '...' : text,
+            summary: aiReply.replace(/\*\*/g, '').slice(0, 220) + (aiReply.length > 220 ? '...' : ''),
+            sourceTitle: sources[0]?.title || 'Konzultace v Poradním okně',
+            sourceUrl: sources[0]?.uri || ''
+          });
+        } catch (err) {
+          const fallbackMsg = directActions.length > 0
+            ? `✅ ${directActions.join(' ')} Vše jsem rovnou přepočítal v okně Výživa & Jídelníček.`
+            : 'Váš požadavek byl zaznamenán. Pro podrobnou metodiku doporučuji dodržet pořadí v tréninku (Koordinace → Rychlost → Síla → Vytrvalost) a vyvážený příjem makroživin.';
+          appendMessage(fallbackMsg, 'system');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Odeslat';
+        }
+      }
+
+      async function handleScanAllTrends() {
+        scanAllBtn.disabled = true;
+        scanBtnText.textContent = 'Prohledávám nové studie a trendy...';
+
+        const topics = [
+          { id: 'silovy', label: 'Silový pilíř', desc: 'hypertrofie, VBT, maximální síla' },
+          { id: 'vytrvalostni', label: 'Vytrvalostní pilíř', desc: 'VO2max, laktátový práh, zóna 2' },
+          { id: 'vybusny', label: 'Výbušný pilíř', desc: 'plyometrie, RFD, postaktivační potenciace' },
+          { id: 'agility', label: 'Agility pilíř', desc: 'reakční rychlost, změny směru' },
+          { id: 'koordinacni', label: 'Koordinační pilíř', desc: 'motorické učení, PNF pohyblivost' }
+        ];
+
+        try {
+          // Vyhledáme aktuální trendy pro 2 klíčové oblasti v jednom průzkumu, aby byl rychlý a přesný
+          const randomPair = topics.sort(() => 0.5 - Math.random()).slice(0, 2);
+          for (const t of randomPair) {
+            await ActiveKnowledgeEngine.discoverTrendsForTopic(t.id, t.label, t.desc);
+          }
+          renderKnowledgeBase();
+          Toast.show('Znalostní báze byla obohacena o nejnovější trendy z webu!');
+        } catch (e) {
+          Toast.show('Průzkum dokončen s využitím lokální znalostní báze.');
+        } finally {
+          scanAllBtn.disabled = false;
+          scanBtnText.textContent = 'Vyhledat nové trendy pro všechna témata';
+        }
+      }
+
+      function init() {
+        triggerBtn.addEventListener('click', () => {
+          state.isOpen ? closeDrawer() : openDrawer('chat');
+        });
+
+        knowledgeTriggerBtn.addEventListener('click', () => {
+          openDrawer('knowledge');
+        });
+
+        closeBtn.addEventListener('click', closeDrawer);
+        backdropEl.addEventListener('click', closeDrawer);
+        pinBtn.addEventListener('click', togglePin);
+
+        drawerTabBtns.forEach((btn) => {
+          btn.addEventListener('click', () => switchDrawerTab(btn.dataset.drawerTab));
+        });
+
+        scanAllBtn.addEventListener('click', handleScanAllTrends);
+
+        ActiveKnowledgeEngine.onChange(() => {
+          if (state.activeTab === 'knowledge') renderKnowledgeBase();
+        });
+
+        window.addEventListener('resize', () => {
+          if (state.isOpen) syncDrawerUI();
+        });
+
+        formEl.addEventListener('submit', (e) => {
+          e.preventDefault();
+          handleUserQuery(inputEl.value);
+        });
+
+        quickChips.forEach((chip) => {
+          chip.addEventListener('click', () => {
+            handleUserQuery(chip.dataset.quickPrompt);
+          });
+        });
+
+        renderKnowledgeBase();
+      }
+
+      return { init, openDrawer, closeDrawer };
+    })();
+
+
+    /**
+     * ==========================================================================
+     * INICIALIZACE APLIKACE PO NAČTENÍ DOM
+     * ==========================================================================
+     */
+    function bootstrapApp() {
+      AppNavigation.init();
+      Window1Pillars.init();
+      Window2SportProfile.init();
+      Window3Nutrition.init();
+      Window4Advisor.init();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bootstrapApp);
+    } else {
+      bootstrapApp();
+    }
+  </script>
+</body>
+</html>
