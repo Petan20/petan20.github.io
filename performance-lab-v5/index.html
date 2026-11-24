@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="cs" class="scroll-smooth theme-dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Performance Lab | Trénink, zdraví a výživa</title>
+  <meta name="description" content="Osobní dávkování cviků podle zdraví a kondice, trénink podle sportu a cíle, regenerace, výživa a recepty." />
+  <meta name="theme-color" content="#0B1220" />
+
+  <!-- Ikony a instalace na plochu telefonu -->
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Performance Lab" />
+
+  <script src="js/theme-init.js"></script>
+
+  <!-- Písmo Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Styly: Tailwind (předem sestavený, viz README) + vlastní styly -->
+  <link rel="stylesheet" href="css/tailwind.css" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body class="min-h-screen flex flex-col selection:bg-emerald-100 selection:text-emerald-900">
+
+  <!-- ==========================================================================
+       HORNÍ LIŠTA: ZNAČKA, POHLAVÍ, ZDRAVOTNÍ STAV, NAVIGACE
+       ========================================================================== -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 space-y-2.5">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <button type="button" class="brand" onclick="switchView('start')" aria-label="Performance Lab, přejít na začátek">
+          <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 to-blue-600 text-white flex items-center justify-center font-extrabold text-sm shadow-sm" aria-hidden="true">PL</span>
+          <span class="text-left">
+            <span class="block text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">Performance Lab</span>
+            <span class="block text-[12px] text-slate-600">Profil: <strong id="hdr-condition">Bez omezení</strong></span>
+          </span>
+        </button>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" id="theme-toggle" onclick="toggleTheme()" aria-pressed="true" class="theme-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-[13px] font-semibold text-slate-700">
+            <span id="theme-label">Světlý režim</span>
+          </button>
+          <div role="group" aria-label="Pohlaví" class="inline-flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+            <button type="button" id="btn-sex-male" aria-pressed="true" onclick="setSex('male')" class="px-3 py-1 rounded-lg text-[13px] font-bold bg-white text-slate-900 shadow-sm transition-all">Muž</button>
+            <button type="button" id="btn-sex-female" aria-pressed="false" onclick="setSex('female')" class="px-3 py-1 rounded-lg text-[13px] font-bold text-slate-600 hover:text-slate-900 transition-all">Žena</button>
+          </div>
+          <label for="profile-condition" class="sr-only">Zdravotní stav nebo skupina</label>
+          <select id="profile-condition" onchange="updateProfile()" class="cond-select bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold text-slate-800"></select>
+        </div>
+      </div>
+
+      <nav aria-label="Sekce" class="nav-bar no-scrollbar">
+        <button type="button" data-view="start" aria-pressed="true" onclick="switchView('start')" class="view-btn is-on"><span class="nav-num" aria-hidden="true">1</span>Začít</button>
+        <button type="button" data-view="health" aria-pressed="false" onclick="switchView('health')" class="view-btn"><span class="nav-num" aria-hidden="true">2</span>Můj zdravotní stav</button>
+        <button type="button" data-view="training" aria-pressed="false" onclick="switchView('training')" class="view-btn"><span class="nav-num" aria-hidden="true">3</span>Cvičení</button>
+        <button type="button" data-view="sport" aria-pressed="false" onclick="switchView('sport')" class="view-btn"><span class="nav-num" aria-hidden="true">4</span>Sport a cíle</button>
+        <button type="button" data-view="recovery" aria-pressed="false" onclick="switchView('recovery')" class="view-btn"><span class="nav-num" aria-hidden="true">5</span>Regenerace</button>
+        <button type="button" data-view="nutrition" aria-pressed="false" onclick="switchView('nutrition')" class="view-btn"><span class="nav-num" aria-hidden="true">6</span>Výživa</button>
+        <button type="button" data-view="recipes" aria-pressed="false" onclick="switchView('recipes')" class="view-btn"><span class="nav-num" aria-hidden="true">7</span>Recepty</button>
+        <button type="button" data-view="tools" aria-pressed="false" onclick="switchView('tools')" class="view-btn"><span class="nav-num" aria-hidden="true">8</span>Nástroje a poradna</button>
+        <button type="button" data-view="all" aria-pressed="false" onclick="switchView('all')" class="view-btn">Vše na jedné stránce</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6 flex-1">
+
+    <!-- ==========================================================================
+         1. ZAČÍT: CO WEB DĚLÁ + MŮJ PROFIL
+         ========================================================================== -->
+    <section id="sec-start" data-group="start" class="app-section space-y-5">
+      <div class="clean-card hero p-5 sm:p-7 space-y-5">
+        <div class="space-y-2 max-w-3xl">
+          <p class="eyebrow">Trénink · regenerace · výživa</p>
+          <h1 class="hero-title">Cvičení a jídlo nastavené podle vašeho zdraví, kondice a sportu</h1>
+          <p class="text-sm text-slate-700 leading-relaxed">Vyplňte krátký profil. Web podle něj spočítá série, opakování a zátěž u 100 cviků, ukáže, které cviky jsou pro váš zdravotní stav vhodné, a navrhne plán, výživu i recepty.</p>
+        </div>
+        <ol class="step-grid">
+          <li class="step-card"><span class="step-num" aria-hidden="true">1</span><span><strong>Vyplňte profil</strong> níže a nahoře zvolte zdravotní stav (např. vysoký tlak, menopauza, bolesti zad).</span></li>
+          <li class="step-card"><span class="step-num" aria-hidden="true">2</span><span><strong>Podívejte se na cviky a plán.</strong> Dávkování se přizpůsobí věku, únavě, spánku i tepu.</span><button type="button" class="link-btn" onclick="switchView('training')">Přejít na cvičení →</button></li>
+          <li class="step-card"><span class="step-num" aria-hidden="true">3</span><span><strong>Doplňte výživu a recepty</strong> podle cíle: hubnutí, svaly nebo vytrvalost.</span><button type="button" class="link-btn" onclick="switchView('nutrition')">Přejít na výživu →</button></li>
+        </ol>
+      </div>
+
+      <aside role="note" class="clean-card px-4 py-3 border-l-4 border-l-rose-500 text-[13px] leading-relaxed text-slate-700">
+        <strong class="text-rose-800">Upozornění:</strong> Obsah slouží ke vzdělávání a nenahrazuje lékaře, fyzioterapeuta ani nutričního terapeuta. Při zdravotních potížích konzultujte trénink i stravu s odborníkem. Doplňky stravy užívejte jen po vyšetření a doporučení lékaře.
+      </aside>
+
+      <div class="clean-card accent-plan p-5 sm:p-6 space-y-4">
+        <div>
+          <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Můj profil</h2>
+          <p class="text-[13px] text-slate-600">Údaje se uloží jen ve vašem prohlížeči a propíšou se do všech výpočtů na webu.</p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div class="space-y-4">
+            <fieldset class="space-y-2">
+              <legend class="field-legend">O mně</legend>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                <div><label for="c-age" class="block text-[13px] font-semibold text-slate-600 mb-1">Věk</label><input id="c-age" type="number" min="15" max="95" value="35" oninput="onClientChange()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" /></div>
+                <div><label for="c-weight" class="block text-[13px] font-semibold text-slate-600 mb-1">Hmotnost (kg)</label><input id="c-weight" type="number" min="35" max="250" step="0.5" value="75" oninput="onClientChange()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" /></div>
+                <div><label for="c-height" class="block text-[13px] font-semibold text-slate-600 mb-1">Výška (cm)</label><input id="c-height" type="number" min="130" max="225" value="176" oninput="onClientChange()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" /></div>
+                <div><label for="c-level" class="block text-[13px] font-semibold text-slate-600 mb-1">Zkušenost</label><select id="c-level" onchange="onClientChange()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold"><option value="beginner">Začátečník</option><option value="intermediate" selected>Pokročilý</option><option value="advanced">Výkonnostní</option></select></div>
+              </div>
+            </fieldset>
+            <fieldset class="space-y-2">
+              <legend class="field-legend">Tep</legend>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                <div><label for="c-hrrest" class="block text-[13px] font-semibold text-slate-600 mb-1">Klidový tep (ráno)</label><input id="c-hrrest" type="number" min="30" max="120" value="62" oninput="onClientChange()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" /></div>
+                <div><label for="c-hrmax" class="block text-[13px] font-semibold text-slate-600 mb-1">Max. tep (nepovinné)</label><input id="c-hrmax" type="number" min="100" max="225" placeholder="odhadneme" oninput="onClientChange()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" /></div>
+                <div class="col-span-2 sm:col-span-1 flex items-end"><label class="flex items-center gap-2 text-[13px] font-semibold text-slate-700 pb-1.5"><input type="checkbox" id="c-bb" onchange="onClientChange()" class="w-4 h-4" /> Beru betablokátory</label></div>
+              </div>
+            </fieldset>
+            <fieldset class="space-y-2">
+              <legend class="field-legend">Jak se cítím dnes</legend>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                <div><label for="c-fatigue" class="block text-[13px] font-semibold text-slate-600 mb-1">Únava (1–10)</label><input id="c-fatigue" type="number" min="1" max="10" value="3" oninput="onClientChange()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" /></div>
+                <div><label for="c-sleep" class="block text-[13px] font-semibold text-slate-600 mb-1">Spánek (h)</label><input id="c-sleep" type="number" min="2" max="14" step="0.5" value="7.5" oninput="onClientChange()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" /></div>
+                <div><label for="c-pain" class="block text-[13px] font-semibold text-slate-600 mb-1">Bolest (0–10)</label><input id="c-pain" type="number" min="0" max="10" value="0" oninput="onClientChange()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" /></div>
+                <div><label for="c-hrtoday" class="block text-[13px] font-semibold text-slate-600 mb-1">Dnešní ranní tep</label><input id="c-hrtoday" type="number" min="30" max="140" placeholder="nepovinné" oninput="onClientChange()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" /></div>
+              </div>
+            </fieldset>
+          </div>
+          <div class="space-y-3">
+            <h3 data-explain="readiness" class="text-sm font-extrabold text-slate-900 flex items-center gap-2">Shrnutí pro dnešek</h3>
+            <div id="client-summary" class="space-y-3"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         2. MŮJ ZDRAVOTNÍ STAV: JAK TRÉNOVAT, ČEMU SE VYHNOUT, KDY K LÉKAŘI
+         ========================================================================== -->
+    <section id="sec-health" data-group="health" class="app-section space-y-5">
+      <div class="clean-card p-5 border-l-4 border-l-blue-600 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div class="space-y-1.5 min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-[13px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700">Zvolený profil</span>
+            <h2 id="banner-title" class="text-base sm:text-lg font-extrabold text-slate-900">Muž – Standardní sportovec</h2>
+          </div>
+          <p id="banner-desc" class="text-[13px] sm:text-sm text-slate-600 max-w-4xl leading-relaxed"></p>
+          <div id="banner-layman" class="text-[13px] text-blue-900 bg-blue-50/80 border border-blue-200 rounded-xl px-3 py-2 max-w-4xl"></div>
+          <div id="banner-badges" class="flex flex-wrap gap-1.5 pt-1"></div>
+        </div>
+        <div class="flex flex-wrap gap-2 shrink-0">
+          <button type="button" onclick="switchView('sec-exercises')" class="px-3.5 py-2 rounded-xl bg-blue-600 text-white text-[13px] font-semibold hover:bg-blue-700 transition-colors">Cviky pro mě →</button>
+          <button type="button" onclick="switchView('sec-nutrition')" class="px-3.5 py-2 rounded-xl bg-slate-900 text-white text-[13px] font-semibold hover:bg-slate-800 transition-colors">Výživa pro mě →</button>
+        </div>
+      </div>
+      <p class="text-[13px] text-slate-600 px-1">Zdravotní stav měníte v horní liště. K výběru je 26 skupin, od menopauzy a těhotenství po vysoký tlak, artrózu, CHOPN nebo long covid.</p>
+      <div id="health-guide" class="space-y-4"></div>
+    </section>
+
+    <!-- ===== 3. CVIČENÍ: TÝDENNÍ PLÁN ===== -->
+    <section id="sec-plan" data-group="training" class="app-section clean-card accent-plan p-5 sm:p-6 space-y-5">
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-3">
+        <div>
+          <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Týdenní plán</h2>
+          <p class="text-[13px] text-slate-600">Vyberte sport, období a počet tréninků. Plán rozloží trénink do týdne a přizpůsobí ho vašemu zdravotnímu stavu.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+        <div class="col-span-2 lg:col-span-1">
+          <label for="p-sport" class="block text-[13px] font-semibold text-slate-600 mb-1">Sport</label>
+          <select id="p-sport" onchange="setSport(this.value)" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold"></select>
+        </div>
+        <div>
+          <label for="p-period" class="block text-[13px] font-semibold text-slate-600 mb-1">Období</label>
+          <select id="p-period" onchange="renderPlan()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold">
+            <option value="prep" selected>Přípravné (budování)</option>
+            <option value="comp">Závodní (sezóna)</option>
+            <option value="trans">Přechodné (odpočinek)</option>
+          </select>
+        </div>
+        <div>
+          <label for="p-days" class="block text-[13px] font-semibold text-slate-600 mb-1">Tréninků týdně</label>
+          <select id="p-days" onchange="renderPlan()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold">
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4" selected>4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+        </div>
+        <div class="col-span-2 lg:col-span-1">
+          <label for="p-level" class="block text-[13px] font-semibold text-slate-600 mb-1">Úroveň</label>
+          <select id="p-level" onchange="renderPlan()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold">
+            <option value="beginner">Začátečník (do 1 roku)</option>
+            <option value="intermediate" selected>Pokročilý (1–3 roky)</option>
+            <option value="advanced">Výkonnostní (3+ roky)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <!-- Dnes -->
+        <div id="plan-today" class="sub-card p-4 space-y-2 lg:col-span-1"></div>
+        <!-- Shrnutí týdne -->
+        <div class="sub-card p-4 space-y-2 lg:col-span-2">
+          <div class="text-[13px] font-extrabold text-slate-900">Shrnutí týdne</div>
+          <div id="plan-summary" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+          <div id="plan-notes" class="text-[13px] text-slate-700 space-y-1"></div>
+        </div>
+      </div>
+
+      <div id="plan-week" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3"></div>
+
+      <p class="text-[13px] text-slate-600">Plán je výchozí šablona podle sportovní metodiky, ne individuální předpis. Každý 3.–4. týden snižte objem asi o 30–40 % (odlehčovací týden). Když vás něco bolí nebo deník ukazuje nízkou připravenost, vyměňte těžkou jednotku za lehkou.</p>
+    </section>
+
+
+    <!-- ===== 3. CVIČENÍ: 100 CVIKŮ S OSOBNÍM DÁVKOVÁNÍM ===== -->
+    <section id="sec-exercises" data-group="training" class="app-section clean-card accent-exercises p-5 sm:p-6 space-y-4">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Cviky s osobním dávkováním</h2>
+            <span id="ex-count-badge" class="text-[13px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">20 cviků</span>
+          </div>
+          <p class="text-[13px] text-slate-600">5 pilířů po 20 cvicích. U každého vidíte, jestli je pro vás vhodný, a série, opakování, zátěž a pauzu spočítané z vašeho profilu.</p>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <select id="ex-pattern-filter" aria-label="Pohybový vzorec" onchange="renderExercises()" class="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold">
+            <option value="all">Všechny pohybové vzorce</option>
+            <option value="drep">Dřep & Unilaterální DK</option>
+            <option value="hinge">Hip Hinge (kyčelní ohyb)</option>
+            <option value="tlak">Tlaky (horizontální / vertikální)</option>
+            <option value="tah">Tahy (horizontální / vertikální)</option>
+            <option value="core">Core, antirotace & rovnováha</option>
+            <option value="odraz">Odrazy, balistika & rychlost</option>
+            <option value="lokomoce">Lokomoce, vytrvalost & mobilita</option>
+          </select>
+          <label for="ex-search" class="sr-only">Hledat cvik</label>
+          <input id="ex-search" type="text" placeholder="Hledat cvik, sval, řetězec..." oninput="renderExercises()" class="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] w-48 sm:w-56" />
+          <label class="flex items-center gap-2 text-[13px] font-semibold text-slate-700">
+            <input type="checkbox" id="ex-hide" onchange="renderExercises()" class="w-4 h-4" />
+            Skrýt nevhodné pro mě
+          </label>
+        </div>
+      </div>
+
+      <div id="rx-strip" class="rx-strip"></div>
+
+      <!-- Srozumitelná vysvětlivka pohybových vzorců a řetězců -->
+      <div class="layman-box p-3.5 text-[13px] leading-relaxed">
+        <strong>💡 Co znamenají „pohybové vzorce“ a „svalové řetězce“?</strong> Tělo nefunguje jako jednotlivé izolované svaly, ale jako propojené řetězce (např. chodidlo → lýtko → zadní stehno → hýždě → záda). Když trénujete základní vzorce (<em>dřep, ohyb v kyčlích, tlak, tah, stabilitu středu těla a lokomoci</em>), zapojíte celé tělo přirozeně a bezpečně.
+      </div>
+
+      <!-- Bezpečnostní upozornění dle zvoleného zdravotního profilu -->
+      <div id="ex-profile-note" class="sub-card p-3 text-[13px] text-slate-700 border-l-4 border-l-amber-500"></div>
+
+      <!-- Přepínač 5 pilířů pro databázi cviků -->
+      <div id="ex-pillar-tabs" class="flex flex-wrap gap-1.5"></div>
+      <div id="ex-status-sum" class="flex flex-wrap gap-1.5"></div>
+
+      <!-- Mřížka cviků -->
+      <div id="ex-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5"></div>
+    </section>
+
+
+    <!-- ==========================================================================
+         POHYBOVÉ SVAČINKY PROTI SEZENÍ (NOVÉ)
+         ========================================================================== -->
+    <section id="sec-snacks" data-group="training" class="app-section clean-card accent-diary p-5 sm:p-6 space-y-4">
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-3">
+        <div class="max-w-3xl">
+          <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Pohybové svačinky proti sezení</h2>
+          <p class="text-[13px] text-slate-600">Hodina tréninku denně nevyváží 8–10 hodin sezení. Krátké 1–3minutové přestávky každých 30–60 minut snižují vzestup cukru a inzulinu po jídle a ulevují zádům. Výběr cviků se řídí vaším zdravotním stavem.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span id="sn-timer" class="timer tabular-nums" aria-live="polite">2:00</span>
+          <button type="button" id="sn-timer-btn" onclick="startSnackTimer(120)" class="px-3.5 py-2 rounded-xl bg-emerald-600 text-white text-[13px] font-bold hover:bg-emerald-700 transition-colors">Spustit 2 min</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <div><label for="sn-start" class="block text-[13px] font-semibold text-slate-600 mb-1">Začátek práce</label><input id="sn-start" type="time" value="08:00" onchange="renderSnacks()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" /></div>
+        <div><label for="sn-end" class="block text-[13px] font-semibold text-slate-600 mb-1">Konec práce</label><input id="sn-end" type="time" value="16:30" onchange="renderSnacks()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" /></div>
+        <div><label for="sn-every" class="block text-[13px] font-semibold text-slate-600 mb-1">Přestávka každých</label><select id="sn-every" onchange="renderSnacks()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold"><option value="30">30 minut</option><option value="45" selected>45 minut</option><option value="60">60 minut</option></select></div>
+        <div class="flex flex-col justify-end text-[13px]"><strong id="snack-count" class="text-slate-900"></strong><span id="snack-total" class="text-slate-600"></span></div>
+      </div>
+      <ol id="snack-plan" class="space-y-2"></ol>
+      <p class="text-[12px] text-slate-600">Zdroje: Dunstan a kol. 2012 (Diabetes Care); Stamatakis a kol. 2022 (Nature Medicine); WHO 2020. Odškrtnuté přestávky se ukládají jen pro dnešní den.</p>
+    </section>
+
+    <!-- ===== 3. CVIČENÍ: TESTY ===== -->
+    <section id="sec-tests" data-group="training" class="app-section space-y-6">
+      <div class="clean-card accent-tests p-5 sm:p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+          <div>
+            <h2 data-explain="perf" class="text-base sm:text-lg font-extrabold text-slate-900">Testy zdatnosti a můj pokrok</h2>
+            <p class="text-[13px] text-slate-600">Zapisujte výsledky testů každých 6–8 týdnů. U testů s publikovanými normami se zobrazí hodnocení podle věku a pohlaví.</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+          <div class="lg:col-span-2 sub-card p-4 space-y-3">
+            <div>
+              <label for="pt-test" class="block text-[13px] font-semibold text-slate-600 mb-1">Test</label>
+              <select id="pt-test" onchange="renderPerfForm()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold"></select>
+            </div>
+            <p id="pt-how" class="text-[13px] text-slate-700 leading-relaxed"></p>
+            <div class="grid grid-cols-2 gap-2.5">
+              <div>
+                <label for="pt-value" id="pt-value-label" class="block text-[13px] font-semibold text-slate-600 mb-1">Výsledek</label>
+                <input type="number" id="pt-value" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+              </div>
+              <div>
+                <label for="pt-date" class="block text-[13px] font-semibold text-slate-600 mb-1">Datum</label>
+                <input type="date" id="pt-date" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+              </div>
+            </div>
+            <button type="button" onclick="savePerfTest()" class="w-full px-3.5 py-2 rounded-xl bg-cyan-600 text-white text-[13px] font-bold hover:bg-cyan-700 transition-colors">Uložit výsledek</button>
+            <p id="pt-status" class="text-[13px] font-semibold text-cyan-700" role="status" aria-live="polite"></p>
+            <p class="text-[13px] text-slate-600">Věk a pohlaví pro normy se berou z vašeho profilu.</p>
+          </div>
+          <div class="lg:col-span-3 space-y-2">
+            <div class="text-[13px] font-extrabold text-slate-900">Moje výsledky</div>
+            <div id="pt-results" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="clean-card accent-tests p-5 sm:p-6 space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Základní klinické & funkční testy kostry a svalů</h2>
+          <p class="text-[13px] text-slate-600">Jednoduché diagnostické zkoušky bez přístrojů pro odhalení zkrácených svalů, zatuhlých kloubů a asymetrií</p>
+        </div>
+        <select id="test-region" onchange="renderTests()" class="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold">
+          <option value="all">Všechny oblasti těla (8 testů)</option>
+          <option value="spine">Páteř & Hrudník</option>
+          <option value="upper">Rameno & Horní končetina</option>
+          <option value="lower">Kyčel, Koleno, Kotník & Rovnováha</option>
+        </select>
+      </div>
+
+      <div class="layman-box p-3.5 text-[13px] leading-relaxed">
+        <strong>💡 Proč dělat tyto testy?</strong> Než začnete přidávat zátěž, je dobré během 3 minut zjistit, jestli vás nebrzdí ztuhlý kotník, zkrácené kyčle ze sezení nebo slabá stabilita pánve. U každého testu vidíte přesný návod, co je v normě a jaký cvik případný nedostatek rovnou napraví.
+      </div>
+
+      <div id="tests-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </div>
+    </section>
+
+
+    <!-- ===== 4. SPORT: PROFIL SPORTU A 5 PILÍŘŮ ===== -->
+    <section id="sec-sport" data-group="sport" class="app-section grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="clean-card accent-sport p-5 sm:p-6 space-y-4">
+        <div>
+          <h2 data-explain="sport-profile" class="text-base font-extrabold text-slate-900">Fyziologický profil sportu</h2>
+          <p class="text-[13px] text-slate-600">Výkonnostní nároky, energetické systémy a jak sport trénovat</p>
+        </div>
+
+        <div>
+          <label for="sport-select" class="block text-[13px] font-semibold text-slate-600 mb-1">Sport</label>
+          <select id="sport-select" onchange="setSport(this.value)" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-[13px] sm:text-sm font-semibold"></select>
+        </div>
+
+        <div id="sport-profile" class="space-y-4"></div>
+      </div>
+
+      <div class="clean-card accent-sport p-5 sm:p-6 space-y-4">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-900">5 výkonnostních pilířů & Fyziologie</h2>
+          <p class="text-[13px] text-slate-600">Klikněte na pilíř pro zobrazení pravidel tréninku a srozumitelného vysvětlení</p>
+        </div>
+
+        <div id="pillar-pills" class="flex flex-wrap gap-1.5"></div>
+        <div id="pillar-detail" class="space-y-3"></div>
+      </div>
+    </section>
+
+
+    <!-- ==========================================================================
+         TRÉNINK PODLE SPORTU A CÍLE (NOVÉ)
+         ========================================================================== -->
+    <section id="sec-goals" data-group="sport" class="app-section clean-card accent-sport p-5 sm:p-6 space-y-4">
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-3">
+        <div class="max-w-3xl">
+          <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Jak trénovat pro sport a cíl</h2>
+          <p class="text-[13px] text-slate-600">Zvolte sport a cíl. Uvidíte parametry tréninku podle odborných doporučení (ACSM, NSCA, přehledové studie) a jak je uplatnit právě ve vašem sportu.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <div><label for="goal-sport" class="block text-[13px] font-semibold text-slate-600 mb-1">Sport</label><select id="goal-sport" onchange="setSport(this.value)" class="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold"></select></div>
+          <div><label for="goal-select" class="block text-[13px] font-semibold text-slate-600 mb-1">Cíl</label>
+            <select id="goal-select" onchange="renderGoals()" class="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold">
+              <option value="endurance">Vytrvalost</option>
+              <option value="maxStrength">Maximální síla</option>
+              <option value="power">Výbušnost</option>
+              <option value="speed">Rychlost a akcelerace</option>
+              <option value="hypertrophy">Svalová hmota</option>
+              <option value="injury">Prevence zranění</option>
+              <option value="recovery">Regenerace</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div id="goal-out"></div>
+    </section>
+
+    <!-- ===== 5. REGENERACE: DENÍK ===== -->
+    <section id="sec-diary" data-group="recovery" class="app-section clean-card accent-diary p-5 sm:p-6 space-y-5">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Deník tréninku a obnova</h2>
+            <span id="diary-ready-badge" class="text-[13px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              Připravenost: 96 %
+            </span>
+          </div>
+          <p class="text-[13px] text-slate-600">
+            Zadejte parametry svého posledního tréninku a regenerace – výpočet určí další trénink, povolenou intenzitu a fázi obnovy každého systému
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" onclick="saveDiaryEntry()" class="px-3.5 py-2 rounded-xl bg-emerald-600 text-white text-[13px] font-bold hover:bg-emerald-700 transition-colors">
+            + Uložit trénink do deníku
+          </button>
+          <button type="button" onclick="resetDiaryDemo()" class="px-3 py-2 rounded-xl border border-slate-300 text-[13px] font-semibold text-slate-700 hover:bg-slate-50">
+            Výchozí hodnoty
+          </button>
+        </div>
+      </div>
+      <p id="d-save-status" class="text-[13px] text-emerald-700 font-semibold -mt-2" role="status" aria-live="polite"></p>
+
+      <div class="layman-box p-3.5 text-[13px] leading-relaxed">
+        <strong>💡 Jak tento osobní profil funguje?</strong> Zadejte váhu, opakování, čas, tep a subjektivní pocity (únava, spánek, bolest svalů). U silového a výbušného tréninku počítáme s tonáží (váha × opakování × série), u vytrvalosti a agility s průměrným tepem. Pomocí posuvníku <strong>„Čas od dokončení tréninku“</strong> můžete sledovat v jednom společném grafu i ve 4 oddělených grafech, kde přesně se nachází váš nervový systém, energie ve svalech i šlachy – a co dnes raději vynechat.
+      </div>
+
+      <!-- Horní dvou-sloupcový blok: Vstupní formulář + Doporučení & Semafor dne -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <!-- Vstupy tréninku a regenerace (7 sloupců) -->
+        <div class="lg:col-span-7 sub-card p-4 sm:p-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h3 class="text-[13px] sm:text-sm font-extrabold text-slate-900">Parametry tréninku & ranního stavu</h3>
+            <span class="text-[13px] text-slate-600">Propojeno s horním zdravotním profilem</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div>
+              <label for="d-pillar" class="block text-[13px] font-semibold text-slate-600 mb-1">Zaměření / Pilíř tréninku</label>
+              <select id="d-pillar" onchange="updateDiaryModel()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold">
+                <option value="strength" selected>Silový trénink (činky / odpor)</option>
+                <option value="explosive">Výbušnost & Plyometrie (odrazy, RFD)</option>
+                <option value="endurance">Vytrvalostní trénink (běh, kolo, veslo)</option>
+                <option value="agility">Agility & Rychlost (sprinty, změny směru)</option>
+                <option value="coord">Koordinace, rovnováha & mobilita</option>
+              </select>
+            </div>
+            <div>
+              <label for="d-title" class="block text-[13px] font-semibold text-slate-600 mb-1">Název / Poznámka jednotky</label>
+              <input id="d-title" type="text" value="Silový trénink – dřepy a tlaky" placeholder="Např. Dřepy + bench, Běh 10 km..." class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+            </div>
+            <div class="sm:col-span-2">
+              <label for="d-date" class="block text-[13px] font-semibold text-slate-600 mb-1">Datum tréninku (pro výpočet týdenní zátěže)</label>
+              <input id="d-date" type="date" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            <div>
+              <label for="d-weight" class="block text-[13px] font-semibold text-slate-600 mb-1">Hlavní váha (kg)</label>
+              <input id="d-weight" type="number" value="80" min="0" max="400" oninput="updateDiaryModel()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+            </div>
+            <div>
+              <label for="d-reps" class="block text-[13px] font-semibold text-slate-600 mb-1">Opakování (v sérii)</label>
+              <input id="d-reps" type="number" value="6" min="1" max="100" oninput="updateDiaryModel()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+            </div>
+            <div>
+              <label for="d-sets" class="block text-[13px] font-semibold text-slate-600 mb-1">Počet sérií</label>
+              <input id="d-sets" type="number" value="4" min="1" max="30" oninput="updateDiaryModel()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+            </div>
+            <div>
+              <label for="d-time" class="block text-[13px] font-semibold text-slate-600 mb-1">Čas tréninku (min)</label>
+              <input id="d-time" type="number" value="65" min="5" max="360" oninput="updateDiaryModel()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+            </div>
+            <div>
+              <label for="d-hr" class="block text-[13px] font-semibold text-slate-600 mb-1">Průměrný tep (tepů/min)</label>
+              <input id="d-hr" type="number" value="142" min="60" max="220" oninput="updateDiaryModel()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+            </div>
+            <div>
+              <label for="d-rpe" class="block text-[13px] font-semibold text-slate-600 mb-1">Intenzita RPE (1–10)</label>
+              <input id="d-rpe" type="number" value="8" min="1" max="10" oninput="updateDiaryModel()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+            </div>
+            <div>
+              <label for="d-sleep" class="block text-[13px] font-semibold text-slate-600 mb-1">Spánek (hodiny)</label>
+              <input id="d-sleep" type="number" value="7.5" step="0.5" min="2" max="14" oninput="updateDiaryModel()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+            </div>
+            <div>
+              <label for="d-fatigue" class="block text-[13px] font-semibold text-slate-600 mb-1">Celková únava (1–10)</label>
+              <input id="d-fatigue" type="number" value="4" min="1" max="10" oninput="updateDiaryModel()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+            </div>
+            <div>
+              <label for="d-soreness" class="block text-[13px] font-semibold text-slate-600 mb-1">Zatížení / bolest svalů (1–10)</label>
+              <input id="d-soreness" type="number" value="5" min="1" max="10" oninput="updateDiaryModel()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+            </div>
+          </div>
+
+          <!-- Posuvník času od tréninku -->
+          <div class="bg-white border border-slate-200 rounded-xl p-3 space-y-1.5">
+            <div class="flex justify-between items-center text-[13px]">
+              <label for="d-hours" class="font-bold text-slate-800">Čas od dokončení tréninku (simulace průběhu obnovy):</label>
+              <span id="d-hours-label" class="font-extrabold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full">22 hodin po tréninku</span>
+            </div>
+            <input id="d-hours" type="range" min="0" max="96" value="22" oninput="updateDiaryModel()" class="w-full accent-blue-600 cursor-pointer" />
+            <div class="flex justify-between text-[12px] text-slate-500 font-medium">
+              <span>0 h<span class="hidden sm:inline"> (hned po)</span></span>
+              <span>24 h<span class="hidden sm:inline"> (1 den)</span></span>
+              <span>48 h<span class="hidden sm:inline"> (2 dny)</span></span>
+              <span>72 h<span class="hidden sm:inline"> (3 dny)</span></span>
+              <span>96 h<span class="hidden sm:inline"> (4 dny)</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Výpočet dalšího tréninku, povolené intenzity a semafor (5 sloupců) -->
+        <div class="lg:col-span-5 flex flex-col justify-between gap-3">
+          <div class="sub-card p-4 space-y-3 border-l-4 border-l-blue-600">
+            <div>
+              <div class="text-[13px] font-bold uppercase tracking-wider text-blue-700">Doporučený další trénink</div>
+              <div id="d-next-workout" class="text-sm sm:text-base font-extrabold text-slate-900 mt-0.5">
+                Aerobní vytrvalost I2 nebo Koordinace & Mobilita (40–50 min)
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div class="bg-white border border-slate-200 rounded-xl p-2.5">
+                <div class="text-[12px] font-semibold text-slate-600">Max. povolená intenzita</div>
+                <div id="d-max-intensity" class="text-[13px] sm:text-sm font-extrabold text-slate-900 mt-0.5">Max. 65 % 1RM · Zóna I2</div>
+              </div>
+              <div class="bg-white border border-slate-200 rounded-xl p-2.5">
+                <div class="text-[12px] font-semibold text-slate-600">Zátěž poslední jednotky</div>
+                <div id="d-load-summary" class="text-[13px] sm:text-sm font-extrabold text-slate-900 mt-0.5">520 AU · 1 920 kg</div>
+              </div>
+            </div>
+
+            <p id="d-advice-text" class="text-[13px] text-slate-700 leading-relaxed"></p>
+          </div>
+
+          <!-- Semafor: Co cvičit a co vynechat -->
+          <div class="sub-card p-4 space-y-2.5">
+            <div class="text-[13px] font-extrabold text-slate-900">Co v tuto chvíli cvičit a co raději vynechat:</div>
+            <div class="space-y-1.5 text-[13px]">
+              <div class="bg-emerald-50/90 border border-emerald-200 rounded-xl p-2.5 text-emerald-950">
+                <strong class="text-emerald-800">✅ Doporučeno nyní:</strong>
+                <span id="d-do-now"></span>
+              </div>
+              <div class="bg-amber-50/90 border border-amber-200 rounded-xl p-2.5 text-amber-950">
+                <strong class="text-amber-800">⚡ Pouze lehce / technicky:</strong>
+                <span id="d-light-now"></span>
+              </div>
+              <div class="bg-rose-50/90 border border-rose-200 rounded-xl p-2.5 text-rose-950">
+                <strong class="text-rose-800">⛔ Dnes raději vynechat:</strong>
+                <span id="d-avoid-now"></span>
+              </div>
+              <div class="bg-blue-50/80 border border-blue-200 rounded-xl p-2 text-blue-950 text-[13px]">
+                <strong>📅 Výhled za +24 hodin:</strong>
+                <span id="d-tomorrow"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SPOLEČNÝ GRAF SUPERKOMPENZACE VŠECH 4 SYSTÉMŮ -->
+      <div class="sub-card p-4 sm:p-5 space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 data-explain="combined-chart" class="text-[13px] sm:text-sm font-extrabold text-slate-900 flex items-center gap-2">Graf obnovy po tréninku (0–96 hodin)</h3>
+            <p class="text-[13px] text-slate-600">Svislá čára ukazuje vaši aktuální polohu. Zelené pásmo nad 100 % znamená superkompenzaci. Křivky jsou zjednodušený model podle odhadovaných časů obnovy, ne měření vašeho těla.</p>
+          </div>
+          <div class="flex flex-wrap gap-3 text-[13px] font-semibold">
+            <span class="inline-flex items-center gap-1.5"><svg width="26" height="8" aria-hidden="true"><line x1="1" y1="4" x2="25" y2="4" stroke="#2563EB" stroke-width="2.6" stroke-linecap="round" stroke-dasharray=""/></svg>CNS (Nervový systém)</span>
+            <span class="inline-flex items-center gap-1.5"><svg width="26" height="8" aria-hidden="true"><line x1="1" y1="4" x2="25" y2="4" stroke="#059669" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="8 4"/></svg>Svalový glykogen</span>
+            <span class="inline-flex items-center gap-1.5"><svg width="26" height="8" aria-hidden="true"><line x1="1" y1="4" x2="25" y2="4" stroke="#D97706" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="2 4"/></svg>Svaly & Šlachy</span>
+            <span class="inline-flex items-center gap-1.5"><svg width="26" height="8" aria-hidden="true"><line x1="1" y1="4" x2="25" y2="4" stroke="#7C3AED" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="12 4 2 4"/></svg>ATP-CP</span>
+          </div>
+        </div>
+
+        <div id="d-combined-chart" class="w-full overflow-hidden bg-white border border-slate-200 rounded-xl p-2"></div>
+      </div>
+
+      <!-- 4 ODDĚLENÉ GRAFY PRO KAŽDÝ SYSTÉM ZVLÁŠŤ (rozbalovací, aby stránka nebyla přeplněná) -->
+      <details class="sub-card p-4" ontoggle="if (this.open) renderCharts()">
+        <summary class="cursor-pointer text-[13px] sm:text-sm font-extrabold text-slate-900">Zobrazit obnovu každého systému zvlášť (4 grafy)</summary>
+        <h3 data-explain="individual-charts" class="sr-only-heading text-[13px] font-semibold text-slate-600 mt-2 flex items-center gap-2">Jak číst tyto grafy</h3>
+        <div id="d-individual-charts" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mt-2"></div>
+      </details>
+
+      <!-- Historie uložených tréninků v deníku -->
+      <div class="border-t border-slate-200 pt-4 space-y-2.5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 class="text-[13px] sm:text-sm font-extrabold text-slate-900">Uložené záznamy v mém deníku</h3>
+            <span id="d-history-count" class="text-[13px] text-slate-600">0 uložených tréninků</span>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="exportData()" class="px-3 py-1.5 rounded-xl border border-slate-300 text-[13px] font-semibold text-slate-700 hover:bg-slate-50">Zálohovat data do souboru</button>
+            <label for="import-file" class="px-3 py-1.5 rounded-xl border border-slate-300 text-[13px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer">Obnovit ze zálohy</label>
+            <input type="file" id="import-file" accept="application/json,.json" class="sr-only" onchange="importData(this)" />
+          </div>
+        </div>
+        <p id="backup-status" class="text-[13px] font-semibold text-emerald-700" role="status" aria-live="polite"></p>
+        <div id="d-history-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5"></div>
+      </div>
+    </section>
+
+
+    <!-- ===== 5. REGENERACE: ÚNAVA A ZÁTĚŽ ===== -->
+    <section id="sec-fatigue" data-group="recovery" class="app-section space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- sRPE & ACWR -->
+        <div class="clean-card accent-fatigue p-5 space-y-4">
+          <div>
+            <h2 data-explain="acwr" class="text-base font-extrabold text-slate-900">Týdenní zátěž (ACWR)</h2>
+            <p class="text-[13px] text-slate-600">Poměr aktuální (7 dní) a dlouhodobé (28 dní) zátěže</p>
+          </div>
+          <div class="layman-box p-2.5 text-[13px] leading-relaxed">
+            <strong>💡 Pro laika:</strong> <strong>sRPE</strong> = délka tréninku × obtížnost (RPE). <strong>ACWR</strong> porovnává zátěž posledního týdne s průměrem 4 týdnů a hlídá, abyste nepřidali moc rychle. Pásmo <strong>0,8–1,3</strong> se běžně používá jako orientační; skokové navýšení nad 1,5 bývá spojováno s vyšším rizikem zranění (Gabbett 2016). Přesnost poměru je ve vědě sporná (Impellizzeri 2020), berte ho jako vodítko.
+          </div>
+          <label class="flex items-center gap-2 text-[13px] font-semibold text-slate-700">
+            <input type="checkbox" id="f-auto" checked onchange="calcFatigue()" class="w-4 h-4 accent-amber-600" />
+            Počítat týdenní zátěž z deníku
+          </label>
+          <p id="f-auto-note" class="text-[13px] text-slate-600 -mt-2"></p>
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label for="f-min" class="block text-[13px] font-semibold text-slate-600 mb-1">Délka jednotky (min)</label>
+              <input type="number" id="f-min" value="75" min="5" max="360" oninput="calcFatigue()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+            </div>
+            <div>
+              <label for="f-rpe" class="block text-[13px] font-semibold text-slate-600 mb-1">Obtížnost RPE (1–10)</label>
+              <input type="number" id="f-rpe" value="7" min="1" max="10" oninput="calcFatigue()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+            </div>
+            <div>
+              <label for="f-acute" class="block text-[13px] font-semibold text-slate-600 mb-1">Týdenní součet (AU)</label>
+              <input type="number" id="f-acute" value="2100" min="0" oninput="calcFatigue()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+            </div>
+            <div>
+              <label for="f-chronic" class="block text-[13px] font-semibold text-slate-600 mb-1">4týd. průměr (AU)</label>
+              <input type="number" id="f-chronic" value="1850" min="100" oninput="calcFatigue()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2.5">
+            <div class="sub-card p-3">
+              <div class="text-[13px] font-semibold text-slate-600">Jednotka sRPE</div>
+              <div id="out-srpe" class="text-lg font-extrabold text-slate-900">525 AU</div>
+            </div>
+            <div class="sub-card p-3">
+              <div class="text-[13px] font-semibold text-slate-600">Index ACWR</div>
+              <div id="out-acwr" class="text-lg font-extrabold text-slate-900">1,14</div>
+              <span id="badge-acwr" class="inline-block mt-1 px-2 py-0.5 rounded-full text-[12px] font-bold bg-emerald-100 text-emerald-800">Optimální (0,8–1,3)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hooperův index -->
+        <div class="clean-card accent-fatigue p-5 space-y-4">
+          <div>
+            <h2 data-explain="hooper" class="text-base font-extrabold text-slate-900">Ranní kontrola (Hooper)</h2>
+            <p class="text-[13px] text-slate-600">Ranní kontrola regenerace (1 = nejlepší, 7 = nejhorší)</p>
+          </div>
+          <div class="layman-box p-2.5 text-[13px] leading-relaxed">
+            <strong>💡 Pro laika:</strong> Ráno si obodujte 4 pocity (1 = cítím se skvěle, 7 = jsem vyčerpaný). Hooperův index nemá pevné hranice; důležitější je změna proti vašemu běžnému stavu. Orientačně: do <strong>12 bodů</strong> těžký trénink, nad <strong>18 bodů</strong> spíš lehký den nebo volno.
+          </div>
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label for="h-sleep" class="block text-[13px] font-semibold text-slate-600 mb-1">Kvalita spánku (1–7)</label>
+              <input type="number" id="h-sleep" value="2" min="1" max="7" oninput="calcHooper()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+            </div>
+            <div>
+              <label for="h-fatigue" class="block text-[13px] font-semibold text-slate-600 mb-1">Únava (1–7)</label>
+              <input type="number" id="h-fatigue" value="3" min="1" max="7" oninput="calcHooper()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+            </div>
+            <div>
+              <label for="h-doms" class="block text-[13px] font-semibold text-slate-600 mb-1">Bolestivost svalů (1–7)</label>
+              <input type="number" id="h-doms" value="3" min="1" max="7" oninput="calcHooper()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+            </div>
+            <div>
+              <label for="h-stress" class="block text-[13px] font-semibold text-slate-600 mb-1">Psychický stres (1–7)</label>
+              <input type="number" id="h-stress" value="2" min="1" max="7" oninput="calcHooper()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+            </div>
+          </div>
+          <div class="sub-card p-3.5">
+            <div class="text-[13px] font-semibold text-slate-600">Celkové skóre (rozsah 4–28 bodů)</div>
+            <div class="flex items-center justify-between gap-2 mt-0.5">
+              <div id="out-hooper" class="text-xl font-extrabold text-slate-900">10 / 28</div>
+              <span id="badge-hooper" class="px-2.5 py-1 rounded-full text-[13px] font-bold bg-emerald-100 text-emerald-800">Plná připravenost</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zotavení energetických systémů -->
+        <div class="clean-card accent-fatigue p-5 space-y-3">
+          <div>
+            <h2 data-explain="energy" class="text-base font-extrabold text-slate-900">Jak rychle se tělo dobíjí</h2>
+            <p class="text-[13px] text-slate-600">Jak rychle se dobíjejí jednotlivé „baterie“ těla</p>
+          </div>
+          <div class="layman-box p-2.5 text-[13px] leading-relaxed">
+            <strong>💡 Pro laika:</strong> Na krátký sprint nebo těžký dřep používáte rychlou baterii (ATP-CP), která se dobije za 3–5 minut pauzy. Nervový systém a zásoby cukru ve svalech ale potřebují 1 až 3 dny.
+          </div>
+          <div class="divide-y divide-slate-200 text-[13px]">
+            <div class="py-2 flex justify-between gap-2">
+              <div><strong class="text-slate-900">ATP-CP (Blesková energie)</strong><div class="text-[13px] text-slate-600">Sprinty, max. síla, odrazy (do 10 s)</div></div>
+              <div class="text-right shrink-0"><span class="font-bold text-blue-700">3–5 min</span><div class="text-[12px] text-slate-600">poločas ~30–60 s (Bogdanis 1995)</div></div>
+            </div>
+            <div class="py-2 flex justify-between gap-2">
+              <div><strong class="text-slate-900">Glykolytický (Pálení svalů)</strong><div class="text-[13px] text-slate-600">Intenzivní intervaly 30–120 s</div></div>
+              <div class="text-right shrink-0"><span class="font-bold text-blue-700">30–60 min</span><div class="text-[12px] text-slate-600">laktát, rychleji s vyklusáním</div></div>
+            </div>
+            <div class="py-2 flex justify-between gap-2">
+              <div><strong class="text-slate-900">Svalový glykogen (Palivo)</strong><div class="text-[13px] text-slate-600">Dlouhý běh a objemový trénink</div></div>
+              <div class="text-right shrink-0"><span class="font-bold text-blue-700">24–48 hod</span><div class="text-[12px] text-slate-600">dle příjmu sacharidů</div></div>
+            </div>
+            <div class="py-2 flex justify-between gap-2">
+              <div><strong class="text-slate-900">Nervosvalová únava (CNS)</strong><div class="text-[13px] text-slate-600">Výbušnost, plyometrie, těžké váhy</div></div>
+              <div class="text-right shrink-0"><span class="font-bold text-blue-700">24–72 hod</span><div class="text-[12px] text-slate-600">podle objemu, orientačně</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fáze superkompenzace & Přesah na systémy -->
+      <div class="clean-card accent-fatigue p-5 sm:p-6 space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <h2 data-explain="supercomp" class="text-base font-extrabold text-slate-900">Kdy zařadit další trénink</h2>
+            <p class="text-[13px] text-slate-600">Jak dlouho odpočívat po konkrétní délce zatížení a jak daný trénink pomáhá ostatním schopnostem</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <select id="sc-pillar" onchange="renderSupercomp()" class="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold">
+              <option value="strength">Silový pilíř (Max. síla / Hypertrofie)</option>
+              <option value="endurance">Vytrvalostní pilíř (Aerobní / ANP)</option>
+              <option value="explosive">Výbušný pilíř (RFD / Plyometrie)</option>
+              <option value="agility">Agility & Změna směru (COD)</option>
+              <option value="coord">Koordinace, rovnováha & mobilita</option>
+            </select>
+            <select id="sc-load" onchange="renderSupercomp()" class="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold">
+              <option value="0">Krátká / technická zátěž (30–45 min)</option>
+              <option value="1" selected>Střední rozvojová zátěž (60–75 min)</option>
+              <option value="2">Vysoká / vyčerpávající zátěž (90+ min)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="layman-box p-3 text-[13px] leading-relaxed">
+          <strong>💡 Co je superkompenzace?</strong> Po tréninku jste dočasně unavení a slabší. Pokud tělu dopřejete přesně tolik hodin odpočinku, kolik potřebuje, opraví svaly a nervy na <strong>vyšší úroveň než před tréninkem</strong> (tzv. okno superkompenzace). Pokud další těžký trénink zařadíte moc brzy, výkon klesá; když čekáte moc dlouho, efekt vyprchá.
+        </div>
+
+        <div id="sc-output" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+      </div>
+
+      <div class="clean-card accent-fatigue p-5 sm:p-6 space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+          <div>
+            <h2 data-explain="trend" class="text-base font-extrabold text-slate-900">Zátěž a spánek za 4 týdny</h2>
+            <p class="text-[13px] text-slate-600">Sloupce: denní zátěž sRPE z deníku. Čára: hodiny spánku.</p>
+          </div>
+          <div id="trend-stats" class="flex flex-wrap gap-2 text-[13px]"></div>
+        </div>
+        <div id="trend-chart" class="w-full overflow-hidden"></div>
+      </div>
+    </section>
+
+
+    <!-- ===== 6. VÝŽIVA ===== -->
+    <section id="sec-nutrition" data-group="nutrition" class="app-section grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+      <!-- Energie a makroživiny -->
+      <div class="clean-card accent-nutrition p-5 sm:p-6 space-y-4">
+        <div>
+          <h2 data-explain="macro-bar" class="text-base font-extrabold text-slate-900">Energie a makroživiny</h2>
+          <p class="text-[13px] text-slate-600">Hmotnost, výška a věk se berou z vašeho profilu; výpočet reaguje i na zdravotní stav.</p>
+        </div>
+
+        <div class="layman-box p-3 text-[13px] leading-relaxed">
+          <strong>💡 Makro vs. mikroživiny:</strong> <strong>Makroživiny</strong> dodávají energii: sacharidy 4 kcal/g, bílkoviny 4 kcal/g, tuky 9 kcal/g. <strong>Mikroživiny</strong> (vitamíny, minerály) energii nemají, ale řídí pevnost kostí, přenos kyslíku i regeneraci.
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+          <div>
+            <label for="n-weight" class="block text-[13px] font-semibold text-slate-600 mb-1">Hmotnost (kg)</label>
+            <input type="number" id="n-weight" value="72" min="35" max="200" oninput="calcNutrition()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+          </div>
+          <div>
+            <label for="n-height" class="block text-[13px] font-semibold text-slate-600 mb-1">Výška (cm)</label>
+            <input type="number" id="n-height" value="176" min="130" max="225" oninput="calcNutrition()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+          </div>
+          <div>
+            <label for="n-age" class="block text-[13px] font-semibold text-slate-600 mb-1">Věk (roky)</label>
+            <input type="number" id="n-age" value="28" min="15" max="95" oninput="calcNutrition()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+          </div>
+          <div class="col-span-2 sm:col-span-1">
+            <label for="n-act" class="block text-[13px] font-semibold text-slate-600 mb-1">Pohybová aktivita</label>
+            <select id="n-act" onchange="calcNutrition()" class="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-[13px] font-semibold">
+              <option value="1.3">Nízká (kancelář + chůze)</option>
+              <option value="1.55" selected>Střední (3–4 tréninky/týd.)</option>
+              <option value="1.75">Vysoká (5–6 tréninků/týd.)</option>
+              <option value="1.95">Dvoufázová (2 tréninky v jeden den)</option>
+            </select>
+          </div>
+          <div>
+            <label for="n-goal" class="block text-[13px] font-semibold text-slate-600 mb-1">Cíl</label>
+            <select id="n-goal" onchange="calcNutrition()" class="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-[13px] font-semibold">
+              <option value="0.85">Zdravě zhubnout (−15 %)</option>
+              <option value="1" selected>Udržet váhu & energii</option>
+              <option value="1.12">Nabrat svaly (+12 %)</option>
+            </select>
+          </div>
+          <div>
+            <label for="n-diet" class="block text-[13px] font-semibold text-slate-600 mb-1">Stravovací omezení</label>
+            <select id="n-diet" onchange="calcNutrition()" class="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-[13px] font-semibold">
+              <option value="all">Bez omezení</option>
+              <option value="lactose">Bez laktózy</option>
+              <option value="gluten">Bez lepku (celiakie)</option>
+              <option value="veg">Vegetarián (lakto-ovo)</option>
+            </select>
+          </div>
+          <div class="col-span-2 sm:col-span-3">
+            <label for="n-sport" class="block text-[13px] font-semibold text-slate-600 mb-1">Typ zátěže (určuje potřebu bílkovin)</label>
+            <select id="n-sport" onchange="calcNutrition()" class="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-[13px] font-semibold"></select>
+          </div>
+          <div class="col-span-2 sm:col-span-2">
+            <label for="n-ratio" class="block text-[13px] font-semibold text-slate-600 mb-1">Typ stravy (trojpoměr S : T : B)</label>
+            <select id="n-ratio" onchange="calcNutrition()" class="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-[13px] font-semibold"></select>
+          </div>
+          <div class="col-span-2 sm:col-span-1">
+            <label for="n-eq" class="block text-[13px] font-semibold text-slate-600 mb-1">Rovnice BMR</label>
+            <select id="n-eq" onchange="calcNutrition()" class="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-[13px] font-semibold">
+              <option value="mifflin" selected>Mifflin-St Jeor</option>
+              <option value="harris">Harris-Benedict</option>
+            </select>
+          </div>
+          <div id="n-period-wrap" class="col-span-2 sm:col-span-3" hidden>
+            <label for="n-period" class="block text-[13px] font-semibold text-slate-600 mb-1">Zvláštní období</label>
+            <select id="n-period" onchange="calcNutrition()" class="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-[13px] font-semibold">
+              <option value="none" selected>Žádné</option>
+              <option value="preg1">Těhotenství – 1. trimestr</option>
+              <option value="preg23">Těhotenství – 2. a 3. trimestr</option>
+              <option value="lact">Kojení</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="sub-card p-3.5">
+            <div class="text-[13px] font-semibold text-slate-600">Denní energetický příjem</div>
+            <div id="out-kcal" class="text-xl font-extrabold text-slate-900">2 480 kcal</div>
+            <div id="out-kj" class="text-[13px] text-slate-600">10 380 kJ</div>
+            <div id="out-nut-explain" class="text-[13px] text-slate-600 mt-1">Vyrovnaný příjem pro výkon a regeneraci.</div>
+          </div>
+          <div class="sub-card p-3.5">
+            <div class="text-[13px] font-semibold text-slate-600">Makroživiny za den</div>
+            <div id="out-macros" class="text-base font-extrabold text-blue-700 mt-0.5">130 g B · 295 g S · 82 g T</div>
+            <div id="out-gkg" class="text-[13px] text-slate-600 mt-0.5">1,6 g/kg bílkovin</div>
+          </div>
+        </div>
+
+        <!-- Poměr energie z živin -->
+        <div class="space-y-1.5">
+          <div class="flex h-3 rounded-full overflow-hidden bg-slate-100" id="macro-bar" aria-hidden="true"></div>
+          <div id="macro-legend" class="flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-slate-700"></div>
+          <p id="macro-check" class="text-[13px] text-slate-600"></p>
+          <p id="out-protcheck" class="text-[13px] rounded-xl px-3 py-2 status-info"></p>
+        </div>
+
+        <div id="out-bmr" class="text-[13px] text-slate-600 leading-relaxed"></div>
+
+        <!-- Tělesné parametry -->
+        <div class="border-t border-slate-200 pt-3 space-y-2.5">
+          <div class="text-[13px] font-extrabold text-slate-900">Tělesné parametry</div>
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label for="n-waist" class="block text-[13px] font-semibold text-slate-600 mb-1">Obvod pasu (cm, nepovinné)</label>
+              <input type="number" id="n-waist" placeholder="např. 82" min="40" max="200" oninput="calcNutrition()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+            </div>
+            <div>
+              <label for="n-hip" class="block text-[13px] font-semibold text-slate-600 mb-1">Obvod boků (cm, nepovinné)</label>
+              <input type="number" id="n-hip" placeholder="např. 98" min="50" max="200" oninput="calcNutrition()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+            </div>
+          </div>
+          <div id="body-out" class="grid grid-cols-1 sm:grid-cols-3 gap-2"></div>
+          <p class="text-[13px] text-slate-600">BMI nerozlišuje svaly a tuk, u svalnatých sportovců proto nadhodnocuje. Optimální podíl tělesného tuku je 15–18 % u mužů a 20–25 % u žen.</p>
+        </div>
+
+        <div class="border-t border-slate-200 pt-3 space-y-2">
+          <div class="text-[13px] font-extrabold text-slate-900">Klíčové mikroživiny pro váš profil</div>
+          <p class="text-[13px] text-slate-600">Orientační celkový denní příjem ze stravy a případného doplňku. O doplňcích rozhodujte s lékařem.</p>
+          <div id="micro-list" class="divide-y divide-slate-200"></div>
+        </div>
+      </div>
+
+      <!-- Doporučení pro profil + denní cíle -->
+      <div class="clean-card accent-nutrition p-5 sm:p-6 space-y-4">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-900">Výživová doporučení pro váš profil</h2>
+          <p id="tips-subtitle" class="text-[13px] text-slate-600">Zásady podle zvoleného zdravotního stavu</p>
+        </div>
+        <ul id="profile-tips" class="space-y-2 text-[13px] text-slate-800"></ul>
+
+        <div class="border-t border-slate-200 pt-3 space-y-2">
+          <div class="text-[13px] font-extrabold text-slate-900">Denní cíle a limity (přepočteno na váš příjem)</div>
+          <div id="daily-targets" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+        </div>
+
+        <div class="border-t border-slate-200 pt-3 space-y-2">
+          <div class="text-[13px] font-extrabold text-slate-900">Rozložení energie během dne</div>
+          <div id="meal-split" class="space-y-1.5"></div>
+        </div>
+      </div>
+
+      <!-- Dostupnost energie -->
+      <div class="clean-card accent-nutrition p-5 sm:p-6 space-y-4 lg:col-span-2">
+        <div>
+          <h2 data-explain="reds" class="text-base font-extrabold text-slate-900">Dostupnost energie (prevence RED-S)</h2>
+          <p class="text-[13px] text-slate-600">Kolik energie zbývá tělu na základní funkce po odečtení tréninku, na kilogram tukuprosté hmoty</p>
+        </div>
+        <div class="layman-box p-3 text-[13px] leading-relaxed">
+          <strong>💡 Pro laika:</strong> Když dlouhodobě jíte málo vzhledem k tréninku, tělo šetří: zpomalí metabolismus, oslabí kosti a imunitu, u žen vynechá menstruace. Mezinárodní olympijský výbor tento stav nazývá RED-S. Hodnota kolem 45 kcal/kg tukuprosté hmoty odpovídá rovnováze, pod 30 kcal/kg už bývají funkce těla narušené (Loucks 2011; ACSM 2016).
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div>
+            <label for="ea-intake" class="block text-[13px] font-semibold text-slate-600 mb-1">Skutečný příjem (kcal/den)</label>
+            <input type="number" id="ea-intake" placeholder="z kalkulačky" min="500" max="8000" oninput="calcEA()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+          </div>
+          <div>
+            <label for="ea-fat" class="block text-[13px] font-semibold text-slate-600 mb-1">Tělesný tuk (%, nepovinné)</label>
+            <input type="number" id="ea-fat" placeholder="odhad z BMI" min="3" max="60" step="0.5" oninput="calcEA()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+          </div>
+          <div>
+            <label for="ea-min" class="block text-[13px] font-semibold text-slate-600 mb-1">Trénink (min/den, průměr)</label>
+            <input type="number" id="ea-min" value="60" min="0" max="600" oninput="calcEA()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+          </div>
+          <div>
+            <label for="ea-int" class="block text-[13px] font-semibold text-slate-600 mb-1">Intenzita tréninku</label>
+            <select id="ea-int" onchange="calcEA()" class="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-[13px] font-semibold">
+              <option value="5">Lehká (5 MET)</option>
+              <option value="8" selected>Střední (8 MET)</option>
+              <option value="11">Vysoká (11 MET)</option>
+            </select>
+          </div>
+        </div>
+        <div id="ea-out" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5"></div>
+        <p class="text-[13px] text-slate-600">Výdej tréninku je odhad: (MET − 1) × hmotnost × hodiny, tedy bez klidové složky. Tuk bez zadání odhadujeme z BMI podle Deurenberga (1991), což je u sportovců nepřesné. Při podezření na RED-S vyhledejte sportovního lékaře.</p>
+      </div>
+
+      <!-- Jídelníček -->
+      <div class="clean-card accent-nutrition p-5 sm:p-6 space-y-4">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <h2 class="text-base font-extrabold text-slate-900">Denní jídelníček s gramáží</h2>
+            <p class="text-[13px] text-slate-600">Gramáž se přepočítá na váš příjem a dietní omezení. Další jídla najdete v Receptech.</p>
+          </div>
+          <button type="button" onclick="rotateMeals()" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-[13px] font-bold hover:bg-emerald-700 transition-colors shrink-0">
+            ↻ Jiná varianta
+          </button>
+        </div>
+        <div id="diet-note" class="sub-card p-3 text-[13px] text-slate-700 border-l-4 border-l-emerald-500" hidden></div>
+        <div id="meal-list" class="space-y-2.5"></div>
+        <p class="text-[13px] text-slate-600">Hmotnosti jsou v syrovém stavu (rýže, těstoviny, maso). Energie je orientační podle běžných tabulkových hodnot.</p>
+      </div>
+
+      <!-- Výživa kolem tréninku -->
+      <div class="clean-card accent-nutrition p-5 sm:p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+          <div>
+            <h2 class="text-base font-extrabold text-slate-900">Jídlo a pití kolem tréninku</h2>
+            <p class="text-[13px] text-slate-600">Přepočteno na vaši hmotnost z kalkulačky výše</p>
+          </div>
+          <div>
+            <label for="t-duration" class="sr-only">Délka zátěže</label>
+            <select id="t-duration" onchange="renderTiming()" class="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold">
+              <option value="short">Zátěž do 60 min</option>
+              <option value="mid" selected>Zátěž 1–4 hodiny</option>
+              <option value="long">Zátěž nad 4 hodiny</option>
+            </select>
+          </div>
+        </div>
+        <ol id="timing-list" class="space-y-2.5"></ol>
+      </div>
+
+      <!-- Glykemický index -->
+      <div class="clean-card accent-nutrition p-5 sm:p-6 space-y-4">
+        <div>
+          <h2 data-explain="gi" class="text-base font-extrabold text-slate-900">Glykemický index a nálož</h2>
+          <p class="text-[13px] text-slate-600">Jak rychle a jak moc potravina zvedne hladinu cukru v krvi</p>
+        </div>
+        <div class="layman-box p-3 text-[13px] leading-relaxed">
+          <strong>💡 Pro laika:</strong> <strong>GI</strong> říká, jak rychle se cukr z potraviny dostane do krve (glukóza = 100). <strong>Glykemická nálož (GN)</strong> zohledňuje i množství sacharidů: GN = GI × g sacharidů / 100. Pro běžné jídlo jsou výhodné potraviny s GN pod 10, těsně po výkonu naopak pomáhají potraviny s vyšším GI.
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-[13px]" id="gi-table">
+            <caption class="sr-only">Glykemický index a nálož vybraných potravin na 100 g</caption>
+            <thead>
+              <tr class="text-left text-slate-600 border-b border-slate-200">
+                <th scope="col" class="py-1.5 pr-2 font-semibold">Potravina (100 g)</th>
+                <th scope="col" class="py-1.5 px-2 font-semibold text-right">S (g)</th>
+                <th scope="col" class="py-1.5 px-2 font-semibold text-right">GI</th>
+                <th scope="col" class="py-1.5 pl-2 font-semibold text-right">GN</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 tabular-nums"></tbody>
+          </table>
+        </div>
+        <div class="flex flex-wrap gap-2 text-[13px]">
+          <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-semibold">Nízký GI &lt; 55</span>
+          <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold">Střední 56–69</span>
+          <span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 font-semibold">Vysoký ≥ 70</span>
+        </div>
+      </div>
+
+      <!-- Nápoje a kofein -->
+      <div class="clean-card accent-nutrition p-5 sm:p-6 space-y-4">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-900">Sportovní nápoje a kofein</h2>
+          <p class="text-[13px] text-slate-600">Koncentrace nápoje podle typu zátěže a obsah kofeinu v běžných nápojích</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2" id="drink-types"></div>
+        <p class="text-[13px] text-slate-600">Nápoj během zátěže by měl mít 12–15 °C. Alkohol a kofein mají močopudný účinek, k doplnění tekutin se nehodí.</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-[13px]" id="caffeine-table">
+            <caption class="sr-only">Průměrný obsah kofeinu v nápojích</caption>
+            <thead>
+              <tr class="text-left text-slate-600 border-b border-slate-200">
+                <th scope="col" class="py-1.5 pr-2 font-semibold">Nápoj</th>
+                <th scope="col" class="py-1.5 pl-2 font-semibold text-right">Kofein</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 tabular-nums"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Sacharidová superkompenzace -->
+      <div class="clean-card accent-nutrition p-5 sm:p-6 space-y-4">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-900">Sacharidová superkompenzace</h2>
+          <p class="text-[13px] text-slate-600">Doplnění svalového glykogenu nad běžnou úroveň před vytrvalostním závodem</p>
+        </div>
+        <div class="layman-box p-3 text-[13px] leading-relaxed">
+          <strong>💡 Pro laika:</strong> Svaly si dokážou uložit víc „paliva“, když je nejdřív vyčerpáte a pak několik dní jíte více sacharidů. Každý gram glykogenu váže asi 2,7 g vody, proto se před závodem mírně zvýší hmotnost. To je v pořádku.
+        </div>
+        <ol class="space-y-2 text-[13px]">
+          <li class="sub-card p-3">
+            <div class="font-bold text-slate-900">6.–4. den před závodem: vyčerpání zásob</div>
+            <div class="text-slate-700">Intenzivní trénink svalových skupin zapojených do výkonu. Strava s běžným energetickým příjmem, může obsahovat více bílkovin.</div>
+          </li>
+          <li class="sub-card p-3">
+            <div class="font-bold text-slate-900">3.–1. den před závodem: doplnění zásob</div>
+            <div class="text-slate-700">Jen krátké rozcvičení s nízkou intenzitou. Strava s běžným energetickým příjmem, ale s vysokým podílem sacharidů.</div>
+          </li>
+        </ol>
+        <div class="grid grid-cols-2 gap-2 text-[13px]">
+          <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 text-emerald-950">
+            <strong class="text-emerald-800">Větší přínos</strong>
+            <div>Maraton, triatlon, běh na lyžích, silniční cyklistika, vytrvalostní plavání, horolezectví, alpinismus</div>
+          </div>
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800">
+            <strong class="text-slate-700">Menší přínos</strong>
+            <div>Kolektivní sporty, skoky a hody, běh do 10 km, sjezdové lyžování</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Doplňky stravy -->
+      <div class="clean-card accent-nutrition p-5 sm:p-6 space-y-4">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-900">Doplňky stravy podle účinnosti a bezpečnosti</h2>
+          <p class="text-[13px] text-slate-600">Rozdělení podle Vilikus a kol. (2013), Výživa sportovců a sportovní výkon</p>
+        </div>
+        <div id="supp-list" class="space-y-2"></div>
+        <p class="text-[13px] text-slate-600">Závodní sportovci si každý doplněk ověřte v seznamu zakázaných látek WADA (antidoping.cz). Doplněk nenahradí pestrou stravu.</p>
+      </div>
+
+      <p class="lg:col-span-2 text-[13px] text-slate-600 px-1">
+        Odborné údaje v sekci Výživa vycházejí z prezentace Mgr. Ivany Kinkorové, Ph.D., Aplikovaná výživa (FTVS UK) a doporučení WHO.
+      </p>
+    </section>
+
+
+    <!-- ==========================================================================
+         7. RECEPTY (NOVÉ)
+         ========================================================================== -->
+    <section id="sec-recipes" data-group="recipes" class="app-section clean-card accent-nutrition p-5 sm:p-6 space-y-4">
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-3">
+        <div class="max-w-3xl">
+          <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Recepty</h2>
+          <p class="text-[13px] text-slate-600">Jednoduchá česká i sportovní jídla s nutričními hodnotami na porci. Můžete je přepočítat na svůj denní příjem z Výživy.</p>
+        </div>
+        <span id="rc-count" class="chip"></span>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <div><label for="rc-meal" class="block text-[13px] font-semibold text-slate-600 mb-1">Jídlo</label><select id="rc-meal" onchange="renderRecipes()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold"><option value="all">Vše</option><option value="snidane">Snídaně</option><option value="obed">Oběd</option><option value="vecere">Večeře</option><option value="svacina">Svačina</option></select></div>
+        <div><label for="rc-goal" class="block text-[13px] font-semibold text-slate-600 mb-1">Cíl</label><select id="rc-goal" onchange="renderRecipes()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold"><option value="all">Vše</option><option value="hubnuti">Hubnutí</option><option value="svaly">Svaly</option><option value="vytrvalost">Vytrvalost</option><option value="udrzeni">Udržení</option></select></div>
+        <div class="col-span-2"><label for="rc-search" class="block text-[13px] font-semibold text-slate-600 mb-1">Hledat</label><input id="rc-search" type="text" placeholder="např. čočka, losos, tvaroh" oninput="renderRecipes()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" /></div>
+      </div>
+      <div class="flex flex-wrap gap-x-5 gap-y-2 text-[13px] font-semibold text-slate-700">
+        <label class="flex items-center gap-2"><input type="checkbox" id="rc-mine" checked onchange="renderRecipes()" class="w-4 h-4" /> Vhodné pro můj zdravotní stav</label>
+        <label class="flex items-center gap-2"><input type="checkbox" id="rc-diet" checked onchange="renderRecipes()" class="w-4 h-4" /> Respektovat stravovací omezení z Výživy</label>
+        <label class="flex items-center gap-2"><input type="checkbox" id="rc-scale" onchange="renderRecipes()" class="w-4 h-4" /> Přepočítat na můj příjem</label>
+      </div>
+      <p id="rc-note" class="text-[13px] text-slate-600"></p>
+      <div id="recipe-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5"></div>
+      <p class="text-[12px] text-slate-600">Nutriční hodnoty jsou běžné tabulkové hodnoty na 100 g (USDA FoodData Central a etikety výrobků v ČR), surovina v syrovém stavu. Konkrétní výrobek se může lišit o 5–15 %; ověřit je můžete na kaloricketabulky.cz nebo v databázi NutriDatabáze.cz.</p>
+    </section>
+
+    <!-- ===== 8. NÁSTROJE ===== -->
+    <section id="sec-tools" data-group="tools" class="app-section grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="clean-card accent-tools p-5 space-y-3 md:col-span-2">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+          <div>
+            <h2 data-explain="zones" class="text-base font-extrabold text-slate-900">Intenzitní zóny podle tepu</h2>
+            <p class="text-[13px] text-slate-600">Stupnice Olympiatoppen (Norský olympijský výbor): procenta maximální tepové frekvence, laktát, subjektivní námaha a jak v zóně trénovat</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div>
+            <label for="hr-age" class="block text-[13px] font-semibold text-slate-600 mb-1">Věk</label>
+            <input type="number" id="hr-age" value="28" min="10" max="95" oninput="calcHR()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+          </div>
+          <div>
+            <label for="hr-max" class="block text-[13px] font-semibold text-slate-600 mb-1">Změřená HRmax (nepovinné)</label>
+            <input type="number" id="hr-max" placeholder="např. 194" min="120" max="225" oninput="calcHR()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+          </div>
+          <div>
+            <label for="hr-rest" class="block text-[13px] font-semibold text-slate-600 mb-1">Klidový tep (Karvonen)</label>
+            <input type="number" id="hr-rest" placeholder="např. 60" min="30" max="120" oninput="calcHR()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+          </div>
+          <div class="col-span-2">
+            <label for="hr-sport" class="block text-[13px] font-semibold text-slate-600 mb-1">Pohyb, ve kterém zóny použijete</label>
+            <select id="hr-sport" onchange="calcHR()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold">
+              <option value="run" selected>Běh a většina sportů</option>
+              <option value="bike">Kolo, veslo, běžky</option>
+              <option value="swim">Plavání</option>
+            </select>
+          </div>
+        </div>
+        <p id="hr-basis" class="text-[13px] text-slate-700"></p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-[13px] min-w-[640px]" id="zone-table">
+            <caption class="sr-only">Intenzitní zóny s tepovou frekvencí</caption>
+            <thead>
+              <tr class="text-left text-slate-600 border-b border-slate-200">
+                <th scope="col" class="py-2 pr-2 font-semibold">Zóna</th>
+                <th scope="col" class="py-2 px-2 font-semibold">Tep (tepů/min)</th>
+                <th scope="col" class="py-2 px-2 font-semibold">Karvonen</th>
+                <th scope="col" class="py-2 px-2 font-semibold">Laktát (mmol/l)</th>
+                <th scope="col" class="py-2 px-2 font-semibold">Námaha (Borg)</th>
+                <th scope="col" class="py-2 pl-2 font-semibold">K čemu a jak trénovat</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 align-top"></tbody>
+          </table>
+        </div>
+        <p class="text-[13px] text-slate-600">Tep reaguje se zpožděním 1–3 minut, u krátkých úseků se řiďte časem, rychlostí nebo výkonem. Odhad HRmax podle věku (Tanaka 2001: 208 − 0,7 × věk) se může od skutečnosti lišit o ±10 tepů, nejpřesnější je změřit ji v maximálním testu.</p>
+      </div>
+
+      <div class="clean-card accent-tools p-5 space-y-3">
+        <div>
+          <h2 data-explain="rm" class="text-base font-extrabold text-slate-900">Odhad 1RM a zátěž</h2>
+          <p class="text-[13px] text-slate-600">Bezpečný výpočet vaší maximální síly pro 1 opakování bez nutnosti riskovat zranění</p>
+        </div>
+        <div class="layman-box p-2.5 text-[13px]">
+          <strong>💡 Pro laika:</strong> Zadejte váhu, se kterou zvládnete poctivě 5–8 opakování. Kalkulačka spočítá vaše <strong>1RM (maximum na 1 opakování)</strong> a doporučí váhy pro sílu (85 %) i svaly (75 %).
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label for="rm-weight" class="block text-[13px] font-semibold text-slate-600 mb-1">Zvednutá váha (kg)</label>
+            <input type="number" id="rm-weight" value="80" min="5" max="400" oninput="calc1RM()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+          </div>
+          <div>
+            <label for="rm-reps" class="block text-[13px] font-semibold text-slate-600 mb-1">Počet opakování (1–12)</label>
+            <input type="number" id="rm-reps" value="6" min="1" max="12" oninput="calc1RM()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+          </div>
+        </div>
+        <div class="sub-card p-3 flex items-center justify-between">
+          <span class="text-[13px] font-semibold text-slate-600">Odhadované maximum (1RM):</span>
+          <span id="rm-out" class="text-lg font-extrabold text-slate-900">95.2 kg</span>
+        </div>
+        <div id="rm-zones" class="flex flex-wrap gap-1.5"></div>
+      </div>
+
+      <div class="clean-card accent-tools p-5 space-y-3">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-900">Dechový trenažér (CNS, Astma, Pectus)</h2>
+          <p class="text-[13px] text-slate-600">Vizuální průvodce pro zklidnění nervové soustavy a uvolnění hrudníku</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <select id="breath-mode" onchange="stopBreath()" aria-label="Typ dechového cvičení" class="flex-1 min-w-0 w-full sm:w-auto bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold">
+            <option value="cns">4-7-8 (Zklidnění po tréninku a před spaním)</option>
+            <option value="box">4-4-4-4 Box Breathing (Soustředění před výkonem)</option>
+            <option value="asthma">4-2-6 Prodloužený výdech (Astma & Pectus)</option>
+          </select>
+          <button type="button" id="breath-btn" onclick="toggleBreath()" class="px-4 py-1.5 rounded-xl bg-blue-600 text-white text-[13px] font-bold hover:bg-blue-700 transition-colors">
+            Spustit
+          </button>
+        </div>
+        <div class="py-3 flex flex-col items-center">
+          <span id="breath-phase" class="sr-only" aria-live="polite"></span>
+          <div id="pacer-circle" aria-hidden="true" class="w-24 h-24 rounded-full bg-blue-50 border-4 border-blue-600 flex items-center justify-center text-[13px] font-extrabold text-blue-700 transition-transform duration-1000 ease-in-out">
+            Připraveno
+          </div>
+          <p id="breath-note" class="text-[13px] text-slate-600 text-center mt-3 max-w-sm">
+            Nádech nosem 4 s, zádrž 7 s, pomalý výdech 8 s. Pomalé dýchání s dlouhým výdechem zklidňuje nervový systém a může urychlit pokles tepové frekvence po zátěži.
+          </p>
+        </div>
+      </div>
+
+      <div class="clean-card accent-tools p-5 space-y-3">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-900">Hydratace & Elektrolyty</h2>
+          <p class="text-[13px] text-slate-600">Kolik tekutin potřebujete v klidu a kolik doplnit během sportu</p>
+        </div>
+        <div class="layman-box p-2.5 text-[13px]">
+          <strong>💡 Pro laika:</strong> Už ztráta 2 % tělesné hmotnosti potem snižuje sílu i soustředění. Při zátěži nad 2 hodiny, velkém pocení nebo „slaném“ potu pijte nápoj se sodíkem (ACSM 2016).
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label for="hyd-weight" class="block text-[13px] font-semibold text-slate-600 mb-1">Hmotnost (kg)</label>
+            <input type="number" id="hyd-weight" value="72" min="35" max="200" oninput="calcHydration()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+          </div>
+          <div>
+            <label for="hyd-min" class="block text-[13px] font-semibold text-slate-600 mb-1">Trénink (min)</label>
+            <input type="number" id="hyd-min" value="60" min="0" max="300" oninput="calcHydration()" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[13px] font-semibold" />
+          </div>
+        </div>
+        <div class="sub-card p-3.5">
+          <div class="text-[13px] font-semibold text-slate-600">Doporučený denní příjem tekutin</div>
+          <div id="hyd-out" class="text-xl font-extrabold text-slate-900">3.17 l / den</div>
+          <div id="hyd-detail" class="text-[13px] text-slate-600 mt-0.5">Základ 2.52 l + 0.65 l při zátěži (včetně sodíkem při zátěži nad 2 h).</div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ===== 8. PORADNÍ OKNO ===== -->
+    <section id="sec-advisor" data-group="tools" class="app-section clean-card accent-advisor p-5 sm:p-6 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-900">Kontextové poradní okno & Vyhledávání v databázi</h2>
+          <p class="text-[13px] text-slate-600">Umí dohledávat konkrétní cviky ze všech 100 položek, klinické testy, vyhodnotit únavu i upravit živiny dle vašeho profilu</p>
+        </div>
+        <button type="button" onclick="clearChat()" class="px-3 py-1.5 rounded-xl border border-slate-300 text-[13px] font-semibold text-slate-700 hover:bg-slate-50">
+          Vymazat historii
+        </button>
+      </div>
+
+      <div class="flex flex-wrap gap-1.5">
+        <button type="button" onclick="askPreset('Doporuč cviky na hýždě a zadní řetězec')" class="px-3 py-1 rounded-full bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-[13px] font-medium text-slate-700">Cviky na hýždě & zadní řetězec</button>
+        <button type="button" onclick="askPreset('Najdi cviky na hrudník a držení těla')" class="px-3 py-1 rounded-full bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-[13px] font-medium text-slate-700">Cviky na hrudník & držení těla</button>
+        <button type="button" onclick="askPreset('Jak otestovat kyčel, kotník nebo rameno?')" class="px-3 py-1 rounded-full bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-[13px] font-medium text-slate-700">Jak otestovat klouby?</button>
+        <button type="button" onclick="askPreset('Doporučení pro můj aktuální profil')" class="px-3 py-1 rounded-full bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-[13px] font-medium text-slate-700">Doporučení pro můj profil</button>
+        <button type="button" onclick="askPreset('Vyhodnoť mou únavu podle ACWR a Hoopera')" class="px-3 py-1 rounded-full bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-[13px] font-medium text-slate-700">Vyhodnotit únavu</button>
+      </div>
+
+      <div id="chat-box" class="h-60 overflow-y-auto sub-card p-3.5 space-y-2.5 flex flex-col"></div>
+
+      <div class="flex gap-2">
+        <input id="chat-input" type="text" placeholder="Zeptejte se např. na cviky na záda/kotník/výbušnost, testy kloubů nebo menopauzu..." class="flex-1 bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-[13px] sm:text-sm focus:border-blue-600" onkeydown="if(event.key==='Enter') sendChat()" />
+        <button type="button" onclick="sendChat()" class="px-4 py-2 rounded-xl bg-slate-900 text-white text-[13px] font-bold hover:bg-slate-800">
+          Odeslat
+        </button>
+      </div>
+    </section>
+
+
+    <!-- Zdroje -->
+    <details class="clean-card p-5 sm:p-6 text-[13px] text-slate-700" id="sources">
+      <summary class="cursor-pointer font-extrabold text-slate-900 text-sm">Zdroje a metodika</summary>
+      <div class="mt-3 space-y-3 leading-relaxed">
+        <p>Čísla v aplikaci pocházejí z odborných doporučení a studií níže. Profily sportů (sloupce schopností) a model superkompenzace v deníku jsou zjednodušené odborné odhady, ne změřené hodnoty konkrétního člověka. Rozpětí VO2max jsou orientační a liší se podle studie, úrovně a pohlaví.</p>
+        <ol id="ref-list" class="list-decimal pl-5 space-y-1"></ol>
+      </div>
+    </details>
+  </main>
+
+  <!-- Skripty: pořadí je důležité (nejdřív pomocné funkce a data, nakonec spuštění) -->
+  <script src="js/helpers.js"></script>
+  <script src="js/data/profiles.js"></script>
+  <script src="js/data/exercises.js"></script>
+  <script src="js/data/nutrition.js"></script>
+  <script src="js/data/sports.js"></script>
+  <script src="js/data/conditions.js"></script>
+  <script src="js/data/recipes.js"></script>
+  <script src="js/explain.js"></script>
+  <script src="js/client.js"></script>
+  <script src="js/prescribe.js"></script>
+  <script src="js/profile-ui.js"></script>
+  <script src="js/training.js"></script>
+  <script src="js/nutrition.js"></script>
+  <script src="js/tools.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/diary.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/plan.js"></script>
+  <script src="js/zones-tests.js"></script>
+  <script src="js/load-energy.js"></script>
+  <script src="js/goals.js"></script>
+  <script src="js/snacks.js"></script>
+  <script src="js/recipes.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

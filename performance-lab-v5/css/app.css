@@ -1,0 +1,332 @@
+/* Performance Lab · vlastní styly (karty, tmavý vzhled, barvy pilířů) */
+:root {
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+body {
+  background-color: #F8FAFC;
+  color: #0F172A;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.clean-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 1.125rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 6px 20px -6px rgba(15, 23, 42, 0.05);
+}
+.sub-card {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 0.875rem;
+}
+.layman-box {
+  background: #F0F9FF;
+  border: 1px solid #BAE6FD;
+  border-radius: 0.875rem;
+  color: #0C4A6E;
+}
+.metric-fill {
+  transition: width 0.55s var(--ease-expo);
+}
+@keyframes spinRing {
+  to { transform: rotate(360deg); }
+}
+.spinner-ring {
+  animation: spinRing 0.75s linear infinite;
+}
+/* Viditelný fokus při ovládání klávesnicí */
+:focus-visible {
+  outline: 2px solid #2563EB;
+  outline-offset: 2px;
+}
+input:focus-visible, select:focus-visible {
+  outline-offset: 1px;
+  border-color: #2563EB;
+}
+.tabular-nums { font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+/* =====================================================================
+   BARVY PILÍŘŮ A SEKCÍ
+   ===================================================================== */
+:root {
+  --p-strength: #E11D48; --p-endurance: #059669; --p-explosive: #D97706; --p-agility: #7C3AED; --p-coord: #0891B2;
+}
+html.theme-dark {
+  --p-strength: #FB7185; --p-endurance: #34D399; --p-explosive: #FBBF24; --p-agility: #A78BFA; --p-coord: #22D3EE;
+}
+.accent-plan { --acc: #0284C7; }
+.accent-diary { --acc: #059669; }
+.accent-sport { --acc: #4F46E5; }
+.accent-exercises { --acc: var(--p-strength); }
+.accent-tests { --acc: #0891B2; }
+.accent-fatigue { --acc: #D97706; }
+.accent-nutrition { --acc: #65A30D; }
+.accent-tools { --acc: #7C3AED; }
+.accent-advisor { --acc: #DB2777; }
+html.theme-dark .accent-plan { --acc: #38BDF8; }
+html.theme-dark .accent-diary { --acc: #34D399; }
+html.theme-dark .accent-sport { --acc: #818CF8; }
+html.theme-dark .accent-tests { --acc: #22D3EE; }
+html.theme-dark .accent-fatigue { --acc: #FBBF24; }
+html.theme-dark .accent-nutrition { --acc: #A3E635; }
+html.theme-dark .accent-tools { --acc: #C4B5FD; }
+html.theme-dark .accent-advisor { --acc: #F472B6; }
+.clean-card[class*="accent-"] { border-top: 3px solid var(--acc); }
+.clean-card[class*="accent-"] h2 { display: flex; align-items: center; gap: 0.5rem; }
+.clean-card[class*="accent-"] h2::before {
+  content: ""; width: 0.6rem; height: 0.6rem; border-radius: 0.2rem; background: var(--acc); flex: none;
+}
+.pillar-dot { width: 0.6rem; height: 0.6rem; border-radius: 999px; display: inline-block; flex: none; }
+.pill-on { color: #fff !important; border-color: transparent !important; }
+html.theme-dark .pill-on { color: #0B1220 !important; }
+
+/* =====================================================================
+   TMAVÝ REŽIM (výchozí). Přemapuje použité barvy Tailwindu.
+   ===================================================================== */
+html.theme-dark { color-scheme: dark; }
+html.theme-dark body { background-color: #0B1220; color: #E6EDF7; }
+html.theme-dark .clean-card { background: #111A2B; border-color: #22304A; box-shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -10px rgba(0,0,0,.6); }
+html.theme-dark .sub-card { background: #0D1626; border-color: #22304A; }
+html.theme-dark .layman-box { background: #0E2236; border-color: #1E4A6B; color: #BFE3FB; }
+html.theme-dark header { background: rgba(11,18,32,.94) !important; border-color: #22304A !important; }
+html.theme-dark .bg-white { background-color: #0F1A2B !important; }
+html.theme-dark .bg-slate-50, html.theme-dark .hover\:bg-slate-50:hover { background-color: #132036 !important; }
+html.theme-dark .bg-slate-100 { background-color: #17243A !important; }
+html.theme-dark .bg-slate-200 { background-color: #22304A !important; }
+html.theme-dark .bg-slate-900 { background-color: #E6EDF7 !important; color: #0B1220 !important; }
+html.theme-dark .hover\:bg-slate-800:hover { background-color: #FFFFFF !important; }
+html.theme-dark .text-slate-900 { color: #F1F5FB !important; }
+html.theme-dark .text-slate-800 { color: #DCE4F0 !important; }
+html.theme-dark .text-slate-700 { color: #C5D0E0 !important; }
+html.theme-dark .text-slate-600 { color: #9FB0C8 !important; }
+html.theme-dark .text-slate-500 { color: #8A9AB3 !important; }
+html.theme-dark .hover\:text-slate-900:hover { color: #FFFFFF !important; }
+html.theme-dark .border-slate-100, html.theme-dark .divide-slate-100 > * + * { border-color: #1B2840 !important; }
+html.theme-dark .border-slate-200, html.theme-dark .divide-slate-200 > * + * { border-color: #22304A !important; }
+html.theme-dark .border-slate-300 { border-color: #2C3C5A !important; }
+html.theme-dark input, html.theme-dark select, html.theme-dark textarea { background-color: #0F1A2B; color: #E6EDF7; }
+html.theme-dark input::placeholder { color: #6B7B95; }
+html.theme-dark .bg-white.text-slate-900.shadow-sm { background-color: #26364F !important; }
+
+/* Měkké barevné plochy */
+html.theme-dark [class*="bg-emerald-50"] { background-color: rgba(16,185,129,.12) !important; }
+html.theme-dark [class*="bg-blue-50"] { background-color: rgba(59,130,246,.14) !important; }
+html.theme-dark [class*="bg-amber-50"] { background-color: rgba(245,158,11,.13) !important; }
+html.theme-dark [class*="bg-rose-50"] { background-color: rgba(244,63,94,.13) !important; }
+html.theme-dark [class*="bg-cyan-50"] { background-color: rgba(6,182,212,.13) !important; }
+html.theme-dark [class*="bg-violet-50"] { background-color: rgba(139,92,246,.14) !important; }
+html.theme-dark .bg-emerald-100 { background-color: rgba(16,185,129,.22) !important; }
+html.theme-dark .bg-amber-100 { background-color: rgba(245,158,11,.22) !important; }
+html.theme-dark .bg-rose-100 { background-color: rgba(244,63,94,.22) !important; }
+html.theme-dark .bg-blue-100 { background-color: rgba(59,130,246,.24) !important; }
+html.theme-dark .border-emerald-200 { border-color: rgba(52,211,153,.35) !important; }
+html.theme-dark .border-blue-200 { border-color: rgba(96,165,250,.35) !important; }
+html.theme-dark .border-amber-200 { border-color: rgba(251,191,36,.35) !important; }
+html.theme-dark .border-rose-200 { border-color: rgba(251,113,133,.35) !important; }
+html.theme-dark .border-cyan-200 { border-color: rgba(34,211,238,.35) !important; }
+html.theme-dark .text-emerald-700, html.theme-dark .text-emerald-800 { color: #6EE7B7 !important; }
+html.theme-dark .text-emerald-900, html.theme-dark .text-emerald-950 { color: #D1FAE5 !important; }
+html.theme-dark .text-blue-700, html.theme-dark .text-blue-800 { color: #93C5FD !important; }
+html.theme-dark .text-blue-900, html.theme-dark .text-blue-950 { color: #DBEAFE !important; }
+html.theme-dark .text-amber-700, html.theme-dark .text-amber-800 { color: #FCD34D !important; }
+html.theme-dark .text-amber-900, html.theme-dark .text-amber-950 { color: #FEF3C7 !important; }
+html.theme-dark .text-rose-700, html.theme-dark .text-rose-800 { color: #FDA4AF !important; }
+html.theme-dark .text-rose-950 { color: #FFE4E6 !important; }
+html.theme-dark .text-cyan-700 { color: #67E8F9 !important; }
+html.theme-dark .accent-blue-600 { accent-color: #60A5FA; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Tailwind v4 nastavuje tlačítkům výchozí kurzor; vrátíme ručičku jako dřív */
+button:not(:disabled), [role="button"], label[for], summary, select { cursor: pointer; }
+
+/* Na telefonu: bez zvětšování textu po otočení a bez šedého záblesku při klepnutí */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+* { -webkit-tap-highlight-color: transparent; }
+
+/* =====================================================================
+   NOVÉ PRVKY (verze 5): navigace, profil, stavové štítky, předpisy,
+   vysvětlivky grafů, svačinky, recepty. Barvy mají světlou i tmavou variantu.
+   ===================================================================== */
+:root {
+  --st-ok: #047857; --st-ok-bg: #ECFDF5; --st-ok-bd: #A7F3D0;
+  --st-mod: #B45309; --st-mod-bg: #FFFBEB; --st-mod-bd: #FDE68A;
+  --st-low: #9A3412; --st-low-bg: #FFF7ED; --st-low-bd: #FED7AA;
+  --st-no: #BE123C; --st-no-bg: #FFF1F2; --st-no-bd: #FECDD3;
+  --st-info: #075985; --st-info-bg: #F0F9FF; --st-info-bd: #BAE6FD;
+  --chip-bg: #F1F5F9; --chip-fg: #334155; --chip-bd: #E2E8F0;
+  --nav-bg: #F1F5F9; --nav-on: #FFFFFF; --nav-fg: #475569; --nav-on-fg: #0F172A;
+  --hero-a: #ECFEFF; --hero-b: #EEF2FF;
+}
+html.theme-dark {
+  --st-ok: #6EE7B7; --st-ok-bg: rgba(16,185,129,.12); --st-ok-bd: rgba(52,211,153,.32);
+  --st-mod: #FCD34D; --st-mod-bg: rgba(245,158,11,.12); --st-mod-bd: rgba(251,191,36,.32);
+  --st-low: #FDBA74; --st-low-bg: rgba(249,115,22,.12); --st-low-bd: rgba(251,146,60,.32);
+  --st-no: #FDA4AF; --st-no-bg: rgba(244,63,94,.12); --st-no-bd: rgba(251,113,133,.32);
+  --st-info: #BAE6FD; --st-info-bg: rgba(14,165,233,.12); --st-info-bd: rgba(56,189,248,.3);
+  --chip-bg: #17243A; --chip-fg: #C5D0E0; --chip-bd: #22304A;
+  --nav-bg: #17243A; --nav-on: #26364F; --nav-fg: #9FB0C8; --nav-on-fg: #F1F5FB;
+  --hero-a: #0E2236; --hero-b: #151D3A;
+}
+
+.status-ok { color: var(--st-ok); background: var(--st-ok-bg); border: 1px solid var(--st-ok-bd); }
+.status-mod { color: var(--st-mod); background: var(--st-mod-bg); border: 1px solid var(--st-mod-bd); }
+.status-low { color: var(--st-low); background: var(--st-low-bg); border: 1px solid var(--st-low-bd); }
+.status-no { color: var(--st-no); background: var(--st-no-bg); border: 1px solid var(--st-no-bd); }
+.status-info { color: var(--st-info); background: var(--st-info-bg); border: 1px solid var(--st-info-bd); }
+.status-info:empty { display: none; }
+
+.chip {
+  display: inline-flex; align-items: center; gap: .25rem;
+  font-size: 12px; font-weight: 700; line-height: 1.3;
+  padding: .15rem .55rem; border-radius: 999px;
+  background: var(--chip-bg); color: var(--chip-fg); border: 1px solid var(--chip-bd);
+}
+.chip.status-ok { color: var(--st-ok); background: var(--st-ok-bg); border-color: var(--st-ok-bd); }
+.chip.status-mod { color: var(--st-mod); background: var(--st-mod-bg); border-color: var(--st-mod-bd); }
+.chip.status-low { color: var(--st-low); background: var(--st-low-bg); border-color: var(--st-low-bd); }
+.chip.status-no { color: var(--st-no); background: var(--st-no-bg); border-color: var(--st-no-bd); }
+
+/* Navigace */
+.brand { display: flex; align-items: center; gap: .75rem; background: none; border: 0; padding: 0; }
+.nav-bar {
+  display: flex; gap: .25rem; padding: .25rem; overflow-x: auto;
+  background: var(--nav-bg); border: 1px solid var(--chip-bd); border-radius: .875rem;
+}
+.view-btn {
+  display: inline-flex; align-items: center; gap: .4rem; white-space: nowrap;
+  padding: .4rem .75rem; border-radius: .6rem; border: 0; background: transparent;
+  font-size: 13px; font-weight: 600; color: var(--nav-fg); transition: background .15s, color .15s;
+}
+.view-btn:hover { color: var(--nav-on-fg); }
+.view-btn.is-on { background: var(--nav-on); color: var(--nav-on-fg); box-shadow: 0 1px 2px rgba(15,23,42,.08); }
+.nav-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.15rem; height: 1.15rem; border-radius: 999px; font-size: 11px; font-weight: 800;
+  background: var(--chip-bd); color: var(--nav-fg);
+}
+.view-btn.is-on .nav-num { background: #0284C7; color: #fff; }
+html.theme-dark .view-btn.is-on .nav-num { background: #38BDF8; color: #0B1220; }
+.cond-select { max-width: 100%; }
+@media (min-width: 640px) { .cond-select { max-width: 22rem; } }
+
+/* Úvod */
+.hero { background: linear-gradient(135deg, var(--hero-a), var(--hero-b)); }
+html.theme-dark .hero { background: linear-gradient(135deg, var(--hero-a), var(--hero-b)) !important; }
+.eyebrow { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #0369A1; }
+html.theme-dark .eyebrow { color: #7DD3FC; }
+.hero-title { font-size: clamp(1.35rem, 2.6vw, 2rem); line-height: 1.2; font-weight: 800; letter-spacing: -0.02em; text-wrap: balance; }
+.step-grid { display: grid; gap: .75rem; grid-template-columns: 1fr; list-style: none; padding: 0; margin: 0; }
+@media (min-width: 768px) { .step-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.step-card {
+  display: grid; grid-template-columns: auto 1fr; gap: .25rem .75rem; align-items: start;
+  padding: .9rem; border-radius: .875rem; font-size: 13px; line-height: 1.5;
+  background: rgba(255,255,255,.75); border: 1px solid var(--chip-bd);
+}
+html.theme-dark .step-card { background: rgba(11,18,32,.55); }
+.step-card .link-btn { grid-column: 2; justify-self: start; }
+.step-num {
+  grid-row: span 2; width: 1.9rem; height: 1.9rem; border-radius: .6rem;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; color: #fff; background: #0284C7;
+}
+html.theme-dark .step-num { background: #38BDF8; color: #0B1220; }
+.field-legend { font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #64748B; margin-bottom: .25rem; }
+html.theme-dark .field-legend { color: #8A9AB3; }
+
+/* Připravenost */
+.ready-card { display: flex; gap: .9rem; align-items: center; padding: .9rem 1rem; border-radius: .875rem; }
+.ready-score {
+  flex: none; width: 3.4rem; height: 3.4rem; border-radius: 999px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.15rem; font-weight: 800; border: 3px solid currentColor; font-variant-numeric: tabular-nums;
+}
+
+/* Odkaz vzhledu tlačítka */
+.link-btn { background: none; border: 0; padding: 0; font-size: 13px; font-weight: 700; color: #0369A1; text-decoration: underline; text-underline-offset: 3px; }
+html.theme-dark .link-btn { color: #7DD3FC; }
+
+/* Předpis cviku */
+.rx-strip { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; padding: .65rem .8rem; border-radius: .875rem; background: var(--st-info-bg); border: 1px solid var(--st-info-bd); }
+.rx-box { padding: .65rem .75rem; border-radius: .75rem; background: #FFFFFF; border: 1px solid #E2E8F0; }
+html.theme-dark .rx-box { background: #0F1A2B; border-color: #22304A; }
+.rx-muted { opacity: .6; }
+.rx-dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .2rem .7rem; margin: .3rem 0 0; font-size: 13px; }
+.rx-dl dt { font-weight: 700; color: #64748B; }
+.rx-dl dd { margin: 0; color: #0F172A; min-width: 0; }
+html.theme-dark .rx-dl dt { color: #8A9AB3; }
+html.theme-dark .rx-dl dd { color: #E6EDF7; }
+
+/* Vysvětlivky grafů */
+.xp-btn {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: 1.35rem; height: 1.35rem; border-radius: 999px; margin-left: .35rem;
+  font-size: 12px; font-weight: 800; line-height: 1;
+  color: #0369A1; background: var(--st-info-bg); border: 1px solid var(--st-info-bd);
+}
+.xp-btn[aria-expanded="true"] { color: #fff; background: #0284C7; border-color: #0284C7; }
+html.theme-dark .xp-btn { color: #7DD3FC; }
+html.theme-dark .xp-btn[aria-expanded="true"] { color: #0B1220; background: #38BDF8; border-color: #38BDF8; }
+.xp-panel { margin-top: .5rem; padding: .7rem .85rem; border-radius: .75rem; font-size: 13px; line-height: 1.55; color: var(--st-info); background: var(--st-info-bg); border: 1px solid var(--st-info-bd); max-width: 70ch; }
+.xp-panel p + p { margin-top: .3rem; }
+.clean-card[class*="accent-"] h2 .xp-btn { margin-left: .1rem; }
+.sr-only-heading { margin-top: .5rem; }
+
+/* Zdravotní průvodce */
+.guide-list { list-style: decimal; padding-left: 1.2rem; display: grid; gap: .35rem; font-size: 13px; line-height: 1.55; }
+.doctor-box { border-radius: .875rem; color: var(--st-info); background: var(--st-info-bg); border: 1px solid var(--st-info-bd); }
+.redflag-box { border-radius: .875rem; color: var(--st-no); background: var(--st-no-bg); border: 1px solid var(--st-no-bd); }
+
+/* Sport a cíl */
+.goal-row { display: grid; gap: .25rem; width: 100%; text-align: left; padding: .4rem .5rem; border-radius: .6rem; background: transparent; border: 1px solid transparent; color: inherit; }
+.goal-row:hover { border-color: var(--chip-bd); }
+.goal-row.is-on { background: var(--chip-bg); border-color: var(--chip-bd); }
+.goal-bar { display: block; height: .4rem; border-radius: 999px; background: var(--chip-bd); overflow: hidden; }
+.goal-bar > span { display: block; height: 100%; border-radius: 999px; background: var(--acc, #4F46E5); }
+
+/* Pohybové svačinky */
+.snack-row { display: grid; grid-template-columns: 3.4rem minmax(0, 1fr) auto; gap: .75rem; align-items: center; padding: .6rem .75rem; border-radius: .75rem; background: #F8FAFC; border: 1px solid #E2E8F0; }
+html.theme-dark .snack-row { background: #0D1626; border-color: #22304A; }
+.snack-row.is-done { opacity: .6; }
+.snack-time { font-weight: 800; font-size: 14px; color: #0F172A; }
+html.theme-dark .snack-time { color: #F1F5FB; }
+.snack-check { font-size: 12px; font-weight: 700; padding: .35rem .6rem; border-radius: .6rem; border: 1px solid var(--chip-bd); background: var(--chip-bg); color: var(--chip-fg); white-space: nowrap; }
+.snack-check[aria-pressed="true"] { color: var(--st-ok); background: var(--st-ok-bg); border-color: var(--st-ok-bd); }
+@media (max-width: 480px) {
+  .snack-row { grid-template-columns: 3rem minmax(0, 1fr); }
+  .snack-check { grid-column: 2; justify-self: start; }
+}
+.timer { font-size: 1.4rem; font-weight: 800; min-width: 4.5rem; text-align: right; }
+
+/* Recepty */
+.macro-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .35rem; }
+.macro-grid > div { display: grid; padding: .35rem .4rem; border-radius: .6rem; background: #FFFFFF; border: 1px solid #E2E8F0; text-align: center; }
+html.theme-dark .macro-grid > div { background: #0F1A2B; border-color: #22304A; }
+.macro-grid span { font-size: 11px; font-weight: 600; color: #64748B; }
+.macro-grid strong { font-size: 15px; font-weight: 800; color: #0F172A; }
+.macro-grid em { font-size: 11px; font-style: normal; color: #64748B; }
+html.theme-dark .macro-grid span, html.theme-dark .macro-grid em { color: #8A9AB3; }
+html.theme-dark .macro-grid strong { color: #F1F5FB; }
+@media (max-width: 380px) { .macro-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* Text přeškrtnutý u nevhodných klíčových cviků */
+.line-through { text-decoration: line-through; }
+
+/* Doplňkové utility, které předem sestavený Tailwind neobsahuje */
+.gap-x-5 { column-gap: 1.25rem; }
+.gap-y-2 { row-gap: .5rem; }
+.justify-end { justify-content: flex-end; }
+.max-w-3xl { max-width: 48rem; }
+.mb-1\.5 { margin-bottom: .375rem; }
+.mt-1\.5 { margin-top: .375rem; }
+.pb-1\.5 { padding-bottom: .375rem; }
+.opacity-80 { opacity: .8; }
+@media (min-width: 640px) { .sm\:p-7 { padding: 1.75rem; } }
+@media (min-width: 1280px) { .xl\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
